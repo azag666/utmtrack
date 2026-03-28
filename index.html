@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Center (Estável)</title>
+    <title>Command Center (Integrado com Extensão)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,7 +184,7 @@
         <aside class="w-full md:w-80 lg:w-96 bg-secondary p-6 md:p-8 flex-shrink-0 border-r border-border-color">
             <header class="mb-8">
                 <h1 class="text-2xl lg:text-3xl font-bold text-white">Command Center</h1>
-                <p class="text-text-secondary mt-1 text-sm">Versão Estável</p>
+                <p class="text-text-secondary mt-1 text-sm">Pronto para a Extensão</p>
             </header>
 
             <div class="space-y-6">
@@ -192,7 +192,7 @@
                     <h2 class="text-lg font-semibold mb-3">1. Autenticação</h2>
                     <label for="accessToken" class="block text-sm font-medium text-text-secondary mb-2">Token de Acesso</label>
                     <input type="password" id="accessToken" class="form-input w-full p-2" placeholder="Cole o token aqui">
-                    <p class="text-xs text-text-secondary mt-2">Permissões: `ads_read`, `read_insights`, `ads_management`.</p>
+                    <p class="text-xs text-text-secondary mt-2">Você pode usar a extensão para preencher automaticamente.</p>
                 </div>
                 <div>
                     <h2 class="text-lg font-semibold mb-3">2. Filtro de Período</h2>
@@ -225,7 +225,7 @@
                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                          </svg>
                         <h2 class="mt-4 text-xl font-semibold text-text-secondary">Aguardando Configuração</h2>
-                        <p class="text-text-secondary mt-1">Insira seu token de acesso e clique em "Carregar Contas".</p>
+                        <p class="text-text-secondary mt-1">Conecte via extensão ou insira o token manualmente.</p>
                     </div>
                     <div id="loader-container" class="text-center hidden">
                         <div class="loader mx-auto"></div>
@@ -334,7 +334,7 @@
         // Armazenamento de dados globais
         let _allCampaigns = [], _allAdsets = [], _allAds = [], _adAccountsData = [];
         let _currentAccountId = null;
-        let _currentAccessToken = null; // Token será pego do input
+        let _currentAccessToken = null;
 
         // Elementos da UI
         const mainContent = document.getElementById('main-content');
@@ -342,7 +342,6 @@
         const sortBy = document.getElementById('sortBy');
         const tableFilterInput = document.getElementById('table-filter-input');
         
-        // Elementos do Layout v1
         const loadDataBtn = document.getElementById('loadDataBtn');
         const accessTokenInput = document.getElementById('accessToken');
         const datePreset = document.getElementById('datePreset');
@@ -362,10 +361,24 @@
         const breakdownModal = document.getElementById('breakdown-modal');
 
         // ===================================
-        // FLUXO PRINCIPAL (Estilo v1)
+        // FLUXO PRINCIPAL E INTEGRAÇÃO EXTENSÃO
         // ===================================
 
         document.addEventListener('DOMContentLoaded', () => {
+            // ---> INTEGRAÇÃO COM A EXTENSÃO AQUI <---
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+
+            if (tokenFromUrl) {
+                // Preenche o input
+                accessTokenInput.value = tokenFromUrl;
+                // Limpa a barra de endereço para o usuário não ficar vendo o token gigante
+                window.history.replaceState({}, document.title, window.location.pathname);
+                // Aperta o botão automaticamente depois de 500ms para dar tempo de renderizar a tela
+                setTimeout(() => loadDataBtn.click(), 500);
+            }
+            // -----------------------------------------
+
             loadDataBtn.addEventListener('click', initializeDashboard);
             
             // Listeners de Ação
@@ -412,7 +425,6 @@
             mainContent.classList.add('hidden');
 
             try {
-                // 1. Buscar contas
                 const response = await apiRequest('/me/adaccounts', { fields: 'id,name,account_status,disable_reason' });
                 const accounts = response.data || [];
                 
@@ -420,7 +432,6 @@
                     throw new Error("Nenhuma conta de anúncios foi encontrada para este token.");
                 }
 
-                // 2. Buscar insights de overview para todas as contas
                 const datePresetValue = datePreset.value;
                 const batch = accounts.map(account => ({
                     method: 'GET',
@@ -443,7 +454,6 @@
                     };
                 });
 
-                // 3. Renderizar tabela de Overview
                 renderOverviewTable(_adAccountsData);
                 
                 hideStatus();
@@ -456,16 +466,12 @@
             }
         }
         
-        // Atualiza dados se o período mudar
         function handleFilterChange() {
             if (!_currentAccessToken) {
                 showError("Token não encontrado. Carregue as contas primeiro.");
                 return;
             }
-            // Recarrega o overview
             initializeDashboard();
-            
-            // Se uma conta já estava selecionada, recarrega os detalhes dela
             if (_currentAccountId) {
                 fetchAllData(_currentAccountId);
             }
@@ -481,7 +487,7 @@
                 return;
             }
             
-            showStatus("Analisando seus dados...", true, 'details-placeholder'); // Mostra loader no placeholder
+            showStatus("Analisando seus dados...", true, 'details-placeholder'); 
             document.getElementById('details-placeholder').classList.remove('hidden');
             summaryDiv.classList.add('hidden');
             reportsContainer.classList.add('hidden');
@@ -501,6 +507,7 @@
                     action_types: "['purchase','add_to_cart','initiate_checkout','link_click']"
                 };
                 
+                // Endpoint correto implementado na versão final
                 const response = await apiRequest(`/${adAccountId}/campaigns`, params);
                 const campaignsData = response.data || [];
 
@@ -512,7 +519,7 @@
                 }
                 
                 processAndRenderData(campaignsData, adAccountId);
-                hideStatus(true, 'details-placeholder'); // Esconde o placeholder
+                hideStatus(true, 'details-placeholder'); 
                 document.getElementById('details-placeholder').classList.add('hidden');
                 summaryDiv.classList.remove('hidden');
                 reportsContainer.classList.remove('hidden');
@@ -522,8 +529,6 @@
                 showError(err.message, true, 'details-placeholder');
             }
         }
-        
-        // ... (Todas as funções de processamento, agregação e utilidade são idênticas às da v5) ...
         
         function processAndRenderData(campaignsData, adAccountId) {
             _allCampaigns = []; _allAdsets = []; _allAds = [];
@@ -568,7 +573,6 @@
                 });
             });
             
-            // Define o título da conta
             const account = _adAccountsData.find(acc => acc.id === adAccountId);
             document.getElementById('details-title').textContent = `Resumo da Conta: ${account ? account.name : ''}`;
             
@@ -639,7 +643,6 @@
             return data;
         }
 
-        // Funções de Status e Erro (Layout v1)
         function showStatus(message, onPlaceholder = false, placeholderId = 'details-placeholder') {
             if (onPlaceholder) {
                 const placeholder = document.getElementById(placeholderId);
@@ -680,41 +683,31 @@
             let errorMessage = err.message;
             if (err.response && err.response.error) {
                 errorMessage = `Erro da API: ${err.response.error.message} (Código: ${err.response.error.code})`;
-                if (err.response.error.code === 190) { // Token inválido
-                    errorMessage = "Token de acesso inválido ou expirado. Gere um novo token e tente novamente.";
+                if (err.response.error.code === 190) { 
+                    errorMessage = "Token de acesso inválido ou expirado. Use a extensão para gerar um novo token.";
                 }
             }
-            showError(errorMessage); // Mostra no <div id="error">
+            showError(errorMessage); 
         }
 
-        // ... (Todas as outras funções de formatação, toast, etc., são idênticas às da v5) ...
-        function safeParseFloat(value) { /* ... (igual v5) ... */ }
-        function formatCurrency(value) { /* ... (igual v5) ... */ }
-        function formatNumber(value) { /* ... (igual v5) ... */ }
-        function formatPercentage(value) { /* ... (igual v5) ... */ }
-        function formatSimplePercentage(value) { /* ... (igual v5) ... */ }
-        function formatStatus(status, toggleHTML = null) { /* ... (igual v5) ... */ }
-        function getInsightValue(insights, field, actionType) { /* ... (igual v5) ... */ }
-        
-        // Copiadas da v5
-        safeParseFloat = (value) => { const num = parseFloat(value); return isNaN(num) ? 0 : num; }
-        formatCurrency = (value) => { const num = parseFloat(value); return isNaN(num) ? 'R$ 0,00' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
-        formatNumber = (value) => { const num = parseInt(value); return isNaN(num) ? '0' : num.toLocaleString('pt-BR'); }
-        formatPercentage = (value) => { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${num.toFixed(2).replace('.', ',')}%`; }
-        formatSimplePercentage = (value) => { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${(num * 100).toFixed(2).replace('.', ',')}%`; }
-        formatStatus = (status, toggleHTML = null) => {
+        function safeParseFloat(value) { const num = parseFloat(value); return isNaN(num) ? 0 : num; }
+        function formatCurrency(value) { const num = parseFloat(value); return isNaN(num) ? 'R$ 0,00' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        function formatNumber(value) { const num = parseInt(value); return isNaN(num) ? '0' : num.toLocaleString('pt-BR'); }
+        function formatPercentage(value) { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${num.toFixed(2).replace('.', ',')}%`; }
+        function formatSimplePercentage(value) { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${(num * 100).toFixed(2).replace('.', ',')}%`; }
+        function formatStatus(status, toggleHTML = null) {
             if (!status) return `<div class="flex items-center"><span class="status-dot bg-slate-500"></span><span class="text-slate-500">N/A</span></div>`;
             const colorMap = {'ACTIVE': 'bg-green-500', 'PAUSED': 'bg-yellow-500', 'ARCHIVED': 'bg-slate-600', 'CAMPAIGN_PAUSED': 'bg-yellow-500', 'ADSET_PAUSED': 'bg-yellow-500', 'IN_PROCESS': 'bg-blue-500', 'WITH_ISSUES': 'bg-red-500', 'DISAPPROVED': 'bg-red-600'};
             const colorClass = colorMap[status] || 'bg-slate-500';
             const statusText = status.replace(/_/g, ' ');
             return `<div class="flex items-center gap-4">${toggleHTML || ''}<div class="flex items-center"><span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.5rem;" class="${colorClass}"></span><span>${statusText}</span></div></div>`;
         }
-        getInsightValue = (insights, field, actionType) => {
+        function getInsightValue(insights, field, actionType) {
             const source = (field === 'actions' ? insights?.actions : insights?.action_values) || [];
             const action = source.find(a => a.action_type === actionType);
             return action ? parseFloat(action.value) : 0;
         }
-        showToast = (message, type = 'info') => {
+        function showToast(message, type = 'info') {
             const toastContainer = document.getElementById('toast-container');
             const toast = document.createElement('div');
             const colors = { info: 'bg-blue-600', success: 'bg-green-600', error: 'bg-red-600' };
@@ -732,15 +725,14 @@
         // FUNÇÕES DE RENDERIZAÇÃO
         // ===================================
         
-        // Nova função para renderizar o Overview
         function renderOverviewTable(accountData) {
             const container = document.getElementById('main-tab-content-overview');
              const tableRows = accountData.map(account => {
-                const rowClass = account.roas >= 1 ? 'bg-green-900/10' : (account.spend > 0 ? 'bg-red-900/10' : '');
+                const rowClass = account.roas >= 1 ? 'bg-green-900/10' : (account.roas > 0 ? 'bg-red-900/10' : '');
                 return `
                     <tr class="data-row ${rowClass} cursor-pointer hover:bg-white/10" data-account-id="${account.id}" title="Clique para ver detalhes">
                         <td class="text-left">${account.name}</td>
-                        <td class="text-right font-semibold ${account.roas >= 1 ? 'text-success' : 'text-danger'}">${account.roas.toFixed(2)}x</td>
+                        <td class="text-right font-semibold ${account.roas >= 1 ? 'text-success' : (account.roas > 0 ? 'text-danger' : 'text-text-secondary')}">${account.roas.toFixed(2)}x</td>
                     </tr>
                 `;
             }).join('');
@@ -762,15 +754,7 @@
             `;
         }
         
-        function renderSummary(spend, revenue, purchases) { /* ... (igual v5) ... */ }
-        function renderTabs() { /* ... (igual v5) ... */ }
-        function sortAndRenderAllTables() { /* ... (igual v5) ... */ }
-        function renderTable(type, data) { /* ... (igual v5) ... */ }
-        function renderInsights(insights) { /* ... (igual v5) ... */ }
-        function renderBreakdownTable(data, type) { /* ... (igual v5) ... */ }
-
-        // Copiadas da v5
-        renderSummary = (spend, revenue, purchases) => {
+        function renderSummary(spend, revenue, purchases) {
              const profit = revenue - spend;
              const roas = spend > 0 ? revenue / spend : 0;
              const cpa = purchases > 0 ? spend / purchases : 0;
@@ -791,7 +775,8 @@
                     <p class="text-3xl font-bold mt-2 ${metric.color || ''}">${metric.value}</p>
                 </div>`).join('');
         }
-        renderTabs = () => {
+        
+        function renderTabs() {
             document.getElementById('detail-tabs').innerHTML = `
                 <button class="tab-button active" data-tab="campaigns">Campanhas (${_allCampaigns.length})</button>
                 <button class="tab-button" data-tab="adsets">Conjuntos (${_allAdsets.length})</button>
@@ -800,7 +785,8 @@
             reportsContainer.classList.remove('hidden');
             switchTab('campaigns', document.getElementById('detail-tabs'), 'detail-tab-content-');
         }
-        sortAndRenderAllTables = () => {
+        
+        function sortAndRenderAllTables() {
             const sortByValue = sortBy.value;
             const sortFn = (a, b) => {
                 const aInsights = a.insights; const bInsights = b.insights;
@@ -820,7 +806,8 @@
             handleTableFilter(getActiveTabId());
             updateSelection();
         }
-        renderTable = (type, data) => {
+        
+        function renderTable(type, data) {
             const container = document.getElementById(`detail-tab-content-${type}`);
             const isAdTable = type === 'ads';
             const tableHeaders = `
@@ -869,7 +856,8 @@
                         <tbody>${tableRows.length > 0 ? tableRows : `<tr><td colspan="${isAdTable ? 17 : 16}" class="text-center py-8 text-text-secondary">Nenhum dado encontrado.</td></tr>`}</tbody>
                         </table></div></div>`;
         }
-        renderInsights = (insights) => {
+        
+        function renderInsights(insights) {
             if (insights.length === 0) { insightsContainer.classList.add('hidden'); return; }
             const insightTemplates = {
                 winner: (ad) => ({ title: "🏆 Criativo Campeão de Vendas", recommendation: "Este é seu criativo validado. Aumente o orçamento neste conjunto ou crie variações dele para escalar." }),
@@ -891,7 +879,8 @@
             }).join('');
              insightsContainer.classList.remove('hidden');
         }
-        renderBreakdownTable = (data, type) => {
+        
+        function renderBreakdownTable(data, type) {
             const modalData = document.getElementById('breakdown-modal-data');
              if (!data || data.length === 0) { modalData.innerHTML = `<p class="text-text-secondary text-center py-4">Nenhum dado de breakdown encontrado.</p>`; return; }
              let headers = '', rows = '';
@@ -916,32 +905,14 @@
         // FUNÇÕES DE AÇÃO E EVENTOS
         // ===================================
         
-        function setupModalCloseListeners() { /* ... (igual v5) ... */ }
-        function setupActionListeners() { /* ... (igual v5) ... */ }
-        async function handleBudgetEdit(campaignId, currentBudget) { /* ... (igual v5) ... */ }
-        function switchTab(tabId, tabContainer, contentPrefix) { /* ... (adaptado do v1) ... */ }
-        function getActiveTabId() { /* ... (igual v5) ... */ }
-        async function updateStatus(objectId, newStatus) { /* ... (igual v5) ... */ }
-        async function updateBudget(campaignId, newBudgetInCents) { /* ... (igual v5) ... */ }
-        async function duplicateObject(id, type, name) { /* ... (igual v5) ... */ }
-        function getSelectedIds() { /* ... (igual v5) ... */ }
-        function updateSelection() { /* ... (igual v5) ... */ }
-        async function performBulkAction(status) { /* ... (igual v5) ... */ }
-        function handleTableFilter(activeTabId) { /* ... (igual v5) ... */ }
-        function showCreativePreview(imageUrl, adText) { /* ... (igual v5) ... */ }
-        function closeCreativePreview() { /* ... (igual v5) ... */ }
-        async function showBreakdownModal(id, name, breakdownType, title) { /* ... (igual v5) ... */ }
-        function closeBreakdownModal() { /* ... (igual v5) ... */ }
-        function generateInsights(processedData) { /* ... (igual v5) ... */ }
-
-        // Copiadas da v5
-        setupModalCloseListeners = () => {
+        function setupModalCloseListeners() {
             document.getElementById('creative-modal-backdrop').addEventListener('click', closeCreativePreview);
             document.getElementById('creative-modal-close').addEventListener('click', closeCreativePreview);
             document.getElementById('breakdown-modal-backdrop').addEventListener('click', closeBreakdownModal);
             document.getElementById('breakdown-modal-close').addEventListener('click', closeBreakdownModal);
         }
-        setupActionListeners = () => {
+        
+        function setupActionListeners() {
             const resultsDiv = document.getElementById('results');
             resultsDiv.addEventListener('click', async (e) => {
                  if (e.target.closest('.edit-budget-btn')) {
@@ -983,14 +954,16 @@
                  if (e.target.id === 'bulk-pause-btn') performBulkAction('PAUSED');
             });
         }
-        handleBudgetEdit = async (campaignId, currentBudget) => {
+        
+        async function handleBudgetEdit(campaignId, currentBudget) {
              const newBudgetString = prompt("Digite o novo orçamento diário (Ex: 50.50):", (currentBudget / 100).toFixed(2));
              if (newBudgetString !== null) {
                  const newBudget = parseFloat(newBudgetString);
                  if (!isNaN(newBudget) && newBudget > 0) { await updateBudget(campaignId, newBudget * 100); } else { alert("Valor de orçamento inválido."); }
              }
         }
-        switchTab = (tabId, tabContainer, contentPrefix) => {
+        
+        function switchTab(tabId, tabContainer, contentPrefix) {
             tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             const button = tabContainer.querySelector(`.tab-button[data-tab="${tabId}"]`);
             if (button) button.classList.add('active');
@@ -999,11 +972,13 @@
             if (activeContent) activeContent.classList.add('active');
             if (contentPrefix === 'detail-tab-content-') { handleTableFilter(tabId); updateSelection(); }
         }
-        getActiveTabId = () => {
+        
+        function getActiveTabId() {
             const activeTabButton = document.querySelector('#detail-tabs .tab-button.active');
             return activeTabButton ? activeTabButton.dataset.tab : null;
         }
-        updateStatus = async (objectId, newStatus) => {
+        
+        async function updateStatus(objectId, newStatus) {
             showToast('Atualizando status...', 'info');
             try {
                 await apiRequest(`/${objectId}`, { status: newStatus }, 'POST');
@@ -1013,7 +988,8 @@
                 showToast('Falha ao atualizar status.', 'error'); handleApiError(err); await fetchAllData(_currentAccountId);
             }
         }
-        updateBudget = async (campaignId, newBudgetInCents) => {
+        
+        async function updateBudget(campaignId, newBudgetInCents) {
             showToast('Atualizando orçamento...', 'info');
              try {
                 await apiRequest(`/${campaignId}`, { daily_budget: newBudgetInCents }, 'POST');
@@ -1024,7 +1000,8 @@
                 showToast('Falha ao atualizar orçamento.', 'error'); handleApiError(err);
             }
         }
-        duplicateObject = async (id, type, name) => {
+        
+        async function duplicateObject(id, type, name) {
             const numCopiesStr = prompt(`Quantas cópias de "${name}" você quer criar?`, "1");
             const numCopies = parseInt(numCopiesStr);
             if (isNaN(numCopies) || numCopies < 1) return;
@@ -1039,14 +1016,16 @@
                 showToast('Falha ao duplicar.', 'error'); handleApiError(err);
             }
         }
-        getSelectedIds = () => {
+        
+        function getSelectedIds() {
             const activeTabId = getActiveTabId();
             if (!activeTabId) return [];
             const activeTabContent = document.getElementById(`detail-tab-content-${activeTabId}`);
             const checkboxes = activeTabContent.querySelectorAll('.row-checkbox:checked');
             return Array.from(checkboxes).map(cb => cb.dataset.id);
         }
-        updateSelection = () => {
+        
+        function updateSelection() {
             const actionBar = document.getElementById('bulk-action-bar');
             const activeTabId = getActiveTabId();
             if (!activeTabId) { actionBar.classList.add('hidden'); return; }
@@ -1067,7 +1046,8 @@
                 selectAllCheckbox.checked = visibleCheckboxes.length > 0 && selectedIds.length === visibleCheckboxes.length;
             }
         }
-        performBulkAction = async (status) => {
+        
+        async function performBulkAction(status) {
             const selectedIds = getSelectedIds();
             if (selectedIds.length === 0) return;
             const actionText = status === 'ACTIVE' ? 'ativar' : 'pausar';
@@ -1082,7 +1062,8 @@
                 showToast('Falha em algumas ações.', 'error'); handleApiError(err); await fetchAllData(_currentAccountId);
             }
         }
-        handleTableFilter = (activeTabId) => {
+        
+        function handleTableFilter(activeTabId) {
             const filterValue = tableFilterInput.value.toLowerCase();
             if (!activeTabId) return;
             const tableBody = document.querySelector(`#detail-tab-content-${activeTabId} tbody`);
@@ -1094,13 +1075,16 @@
             });
             updateSelection();
         }
-        showCreativePreview = (imageUrl, adText) => {
+        
+        function showCreativePreview(imageUrl, adText) {
             document.getElementById('creative-modal-img').src = imageUrl;
             document.getElementById('creative-modal-text').textContent = adText;
             creativeModal.classList.add('flex');
         }
-        closeCreativePreview = () => { creativeModal.classList.remove('flex'); }
-        showBreakdownModal = async (id, name, breakdownType, title) => {
+        
+        function closeCreativePreview() { creativeModal.classList.remove('flex'); }
+        
+        async function showBreakdownModal(id, name, breakdownType, title) {
             breakdownModal.classList.add('flex');
             document.getElementById('breakdown-modal-loader').classList.remove('hidden');
             document.getElementById('breakdown-modal-data').innerHTML = '';
@@ -1115,8 +1099,10 @@
                 document.getElementById('breakdown-modal-loader').classList.add('hidden');
             }
         }
-        closeBreakdownModal = () => { breakdownModal.classList.remove('flex'); }
-        generateInsights = (processedData) => {
+        
+        function closeBreakdownModal() { breakdownModal.classList.remove('flex'); }
+        
+        function generateInsights(processedData) {
             const { allAds, allAdsets, totalSpend } = processedData; let insights = [];
             const VAZAMENTO_GASTO_MINIMO = 50; const SATURACAO_FREQ_MINIMA = 3.5;
             if (allAds.length === 0) return insights;
