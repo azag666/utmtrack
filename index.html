@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Center (Estável)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Design Sofisticado (v5) Aplicado ao Layout da v1 */
+        :root {
+            --bg-primary: #0A0A0A;
+            --bg-secondary: #121212;
+            --bg-card: #181818;
+            --border-color: #262626;
+            --accent-primary: #38bdf8;
+            --accent-secondary: #0ea5e9;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a3a3a3;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #facc15;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        .form-input, .form-select {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: 2px solid var(--accent-primary);
+            border-color: var(--accent-primary);
+            box-shadow: none;
+        }
+        .btn {
+            background-image: linear-gradient(to right, var(--accent-secondary), var(--accent-primary));
+            color: white;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px -5px rgba(14, 165, 233, 0.2);
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px -5px rgba(14, 165, 233, 0.3);
+        }
+        .btn-secondary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover {
+            border-color: var(--text-secondary);
+            color: var(--text-primary);
+        }
+        .btn:disabled, .btn-secondary:disabled {
+            background-color: #262626 !important;
+            background-image: none;
+            cursor: not-allowed;
+            color: #737373;
+            transform: none;
+            box-shadow: none;
+            border-color: #262626;
+        }
+        .loader {
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--accent-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .table-custom-wrapper {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .table-custom { border-collapse: collapse; width: 100%; }
+        .table-custom th, .table-custom td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
+        }
+        .table-custom th {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            text-align: left;
+        }
+        .table-custom th.text-right, .table-custom td.text-right { text-align: right; }
+        .table-custom th.text-center, .table-custom td.text-center { text-align: center; }
+        .table-custom tbody tr:last-child td { border-bottom: none; }
+        .table-custom tbody tr:hover { background-color: rgba(255, 255, 255, 0.03); }
+        
+        .metric-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+             transform: translateY(-3px);
+             box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+        }
+        
+        .modal {
+            position: fixed; inset: 0; z-index: 50; display: none;
+            align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal.flex { display: flex; }
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+        }
+        .modal-content {
+            position: relative; background-color: var(--bg-card);
+            border: 1px solid var(--border-color); border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 100%; max-height: 90vh; overflow-y: auto;
+        }
+        .modal-close-btn {
+            position: absolute; top: 0.75rem; right: 0.75rem;
+            color: var(--text-secondary); border-radius: 99px; padding: 0.25rem;
+        }
+        .modal-close-btn:hover { color: var(--text-primary); background-color: var(--border-color); }
+
+        .tab-button {
+            background: transparent; border: none; color: var(--text-secondary);
+            padding: 0.75rem 0.25rem; margin-right: 1.5rem;
+            border-bottom: 2px solid transparent; transition: all 0.2s; font-weight: 500;
+        }
+        .tab-button.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent-primary);
+            font-weight: 600;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .insight-card {
+             background: var(--bg-card); border: 1px solid var(--border-color);
+             border-left-width: 4px; border-radius: 0.5rem;
+        }
+        .insight-card.danger { border-left-color: var(--danger); }
+        .insight-card.success { border-left-color: var(--success); }
+        .insight-card.warning { border-left-color: var(--warning); }
+        .insight-card .insight-title.danger { color: var(--danger); }
+        .insight-card .insight-title.success { color: var(--success); }
+        .insight-card .insight-title.warning { color: var(--warning); }
+
+        #bulk-action-bar {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .action-btn {
+            color: var(--text-secondary); background: transparent; border: none;
+            cursor: pointer; padding: 0.5rem; border-radius: 0.375rem;
+            transition: all 0.2s;
+        }
+        .action-btn:hover { color: var(--text-primary); background-color: var(--border-color); }
+    </style>
+</head>
+<body>
+
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside class="w-full md:w-80 lg:w-96 bg-secondary p-6 md:p-8 flex-shrink-0 border-r border-border-color">
+            <header class="mb-8">
+                <h1 class="text-2xl lg:text-3xl font-bold text-white">Command Center</h1>
+                <p class="text-text-secondary mt-1 text-sm">Versão Estável</p>
+            </header>
+
+            <div class="space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold mb-3">1. Autenticação</h2>
+                    <label for="accessToken" class="block text-sm font-medium text-text-secondary mb-2">Token de Acesso</label>
+                    <input type="password" id="accessToken" class="form-input w-full p-2" placeholder="Cole o token aqui">
+                    <p class="text-xs text-text-secondary mt-2">Permissões: `ads_read`, `read_insights`, `ads_management`.</p>
+                </div>
+                <div>
+                    <h2 class="text-lg font-semibold mb-3">2. Filtro de Período</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <label for="datePreset" class="block text-sm font-medium text-text-secondary mb-2">Período de Análise</label>
+                            <select id="datePreset" class="form-select w-full p-2">
+                                <option value="today">Hoje</option>
+                                <option value="yesterday">Ontem</option>
+                                <option value="last_7d" selected>Últimos 7 dias</option>
+                                <option value="last_14d">Últimos 14 dias</option>
+                                <option value="last_30d">Últimos 30 dias</option>
+                                <option value="this_month">Este mês</option>
+                                <option value="last_month">Mês passado</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8">
+                <button id="loadDataBtn" class="btn w-full p-3 rounded-md text-base">Carregar Contas</button>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+            <div id="results" class="space-y-8">
+                <div id="status" class="flex items-center justify-center h-full min-h-[60vh]">
+                    <div id="initial-message" class="text-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                         </svg>
+                        <h2 class="mt-4 text-xl font-semibold text-text-secondary">Aguardando Configuração</h2>
+                        <p class="text-text-secondary mt-1">Insira seu token de acesso e clique em "Carregar Contas".</p>
+                    </div>
+                    <div id="loader-container" class="text-center hidden">
+                        <div class="loader mx-auto"></div>
+                        <p id="statusText" class="mt-4 text-text-secondary">Carregando...</p>
+                    </div>
+                </div>
+
+                <div id="error" class="bg-red-900/50 border border-red-700 text-red-300 p-4 rounded-lg hidden"></div>
+
+                <div id="main-content" class="hidden space-y-8">
+                    <div class="border-b border-border-color">
+                        <nav id="main-tabs" class="-mb-px flex">
+                            <button class="tab-button active" data-tab="overview">Overview Geral</button>
+                            <button class="tab-button" data-tab="details">Análise Detalhada</button>
+                        </nav>
+                    </div>
+
+                    <div id="main-tab-content-overview" class="tab-content active">
+                        </div>
+                    <div id="main-tab-content-details" class="tab-content space-y-8">
+                        <div id="details-placeholder" class="text-center text-text-secondary py-20">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            <p class="mt-4">Clique em uma conta no "Overview Geral" para ver a análise detalhada.</p>
+                        </div>
+
+                        <div id="summary" class="hidden">
+                            <h2 id="details-title" class="text-2xl font-bold mb-4 text-text-primary">Resumo da Conta</h2>
+                            <div id="summaryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left"></div>
+                        </div>
+                        
+                        <div id="insights-container" class="hidden">
+                            <h2 class="text-2xl font-bold mb-4 text-text-primary">Insights da IA</h2>
+                            <div id="insights-grid" class="space-y-6"></div>
+                        </div>
+
+                        <div id="bulk-action-bar" class="hidden sticky top-4 z-10 p-3 rounded-md items-center justify-between shadow-lg">
+                            </div>
+
+                        <div id="reports-container" class="hidden">
+                            <div class="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                                <div class="w-full sm:w-auto border-b border-border-color">
+                                    <nav id="detail-tabs" class="-mb-px flex">
+                                        </nav>
+                                </div>
+                                <div class="w-full sm:w-auto flex items-center gap-4">
+                                    <input type="text" id="table-filter-input" class="form-input w-full sm:w-48 p-2 text-sm" placeholder="Filtrar por nome...">
+                                    
+                                    <select id="sortBy" class="form-select p-2 rounded-md text-sm">
+                                        <option value="roas">Ordenar por ROAS</option>
+                                        <option value="purchases">Ordenar por Vendas</option>
+                                        <option value="spend">Ordenar por Gasto</option>
+                                        <option value="cpa">Ordenar por CPA</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="detail-tab-content-campaigns" class="tab-content"></div>
+                            <div id="detail-tab-content-adsets" class="tab-content"></div>
+                            <div id="detail-tab-content-ads" class="tab-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="creative-modal" class="modal p-4">
+        <div id="creative-modal-backdrop" class="modal-backdrop"></div>
+        <div id="creative-modal-content" class="modal-content w-full max-w-lg max-h-[90vh]">
+             <div class="p-6">
+                <img id="creative-modal-img" src="" class="w-full h-auto max-h-[60vh] object-contain rounded-md" alt="Pré-visualização do Anúncio">
+                <p id="creative-modal-text" class="mt-4 text-text-secondary whitespace-pre-wrap"></p>
+            </div>
+             <button id="creative-modal-close" class="modal-close-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+             </button>
+        </div>
+    </div>
+    
+    <div id="breakdown-modal" class="modal p-4">
+        <div id="breakdown-modal-backdrop" class="modal-backdrop"></div>
+        <div id="breakdown-modal-content" class="modal-content w-full max-w-4xl">
+            <div class="p-6">
+                <h3 id="breakdown-modal-title" class="text-xl font-bold mb-4">Análise Detalhada</h3>
+                <div id="breakdown-modal-loader" class="text-center py-12 hidden">
+                    <div class="loader mx-auto"></div>
+                    <p class="mt-4 text-text-secondary">Buscando dados...</p>
+                </div>
+                <div id="breakdown-modal-data" class="overflow-x-auto">
+                    </div>
+            </div>
+             <button id="breakdown-modal-close" class="modal-close-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+             </button>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+    <script>
+        const API_VERSION = 'v19.0';
+        const BASE_URL = `https://graph.facebook.com/${API_VERSION}`;
+
+        // Armazenamento de dados globais
+        let _allCampaigns = [], _allAdsets = [], _allAds = [], _adAccountsData = [];
+        let _currentAccountId = null;
+        let _currentAccessToken = null; // Token será pego do input
+
+        // Elementos da UI
+        const mainContent = document.getElementById('main-content');
+        const mainTabs = document.getElementById('main-tabs');
+        const sortBy = document.getElementById('sortBy');
+        const tableFilterInput = document.getElementById('table-filter-input');
+        
+        // Elementos do Layout v1
+        const loadDataBtn = document.getElementById('loadDataBtn');
+        const accessTokenInput = document.getElementById('accessToken');
+        const datePreset = document.getElementById('datePreset');
+        const statusDiv = document.getElementById('status');
+        const initialMessage = document.getElementById('initial-message');
+        const loaderContainer = document.getElementById('loader-container');
+        const statusText = document.getElementById('statusText');
+        const errorDiv = document.getElementById('error');
+        
+        const summaryDiv = document.getElementById('summary');
+        const summaryGrid = document.getElementById('summaryGrid');
+        const insightsContainer = document.getElementById('insights-container');
+        const insightsGrid = document.getElementById('insights-grid');
+        const reportsContainer = document.getElementById('reports-container');
+        
+        const creativeModal = document.getElementById('creative-modal');
+        const breakdownModal = document.getElementById('breakdown-modal');
+
+        // ===================================
+        // FLUXO PRINCIPAL (Estilo v1)
+        // ===================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataBtn.addEventListener('click', initializeDashboard);
+            
+            // Listeners de Ação
+            setupActionListeners();
+            setupModalCloseListeners();
+
+            // Listeners de Filtro/Ordenação
+            datePreset.addEventListener('change', handleFilterChange);
+            sortBy.addEventListener('change', sortAndRenderAllTables);
+            tableFilterInput.addEventListener('input', () => handleTableFilter(getActiveTabId()));
+            
+            // Navegação por Abas
+            mainTabs.addEventListener('click', (e) => {
+                if (e.target.matches('.tab-button')) {
+                    switchTab(e.target.dataset.tab, mainTabs, 'main-tab-content-');
+                }
+            });
+            document.getElementById('detail-tabs').addEventListener('click', (e) => {
+                if (e.target.matches('.tab-button')) {
+                    switchTab(e.target.dataset.tab, document.getElementById('detail-tabs'), 'detail-tab-content-');
+                }
+            });
+
+            // Clique na tabela de Overview
+            document.getElementById('main-tab-content-overview').addEventListener('click', (e) => {
+                const row = e.target.closest('tr[data-account-id]');
+                if (row) {
+                    _currentAccountId = row.dataset.accountId; // Salva a conta ativa
+                    fetchAllData(_currentAccountId);
+                    switchTab('details', mainTabs, 'main-tab-content-');
+                }
+            });
+        });
+
+        async function initializeDashboard() {
+            _currentAccessToken = accessTokenInput.value.trim();
+            if (!_currentAccessToken) {
+                showError("Por favor, insira o Token de Acesso primeiro.");
+                return;
+            }
+            
+            hideError();
+            showStatus("Buscando contas de anúncios...");
+            mainContent.classList.add('hidden');
+
+            try {
+                // 1. Buscar contas
+                const response = await apiRequest('/me/adaccounts', { fields: 'id,name,account_status,disable_reason' });
+                const accounts = response.data || [];
+                
+                if (accounts.length === 0) {
+                    throw new Error("Nenhuma conta de anúncios foi encontrada para este token.");
+                }
+
+                // 2. Buscar insights de overview para todas as contas
+                const datePresetValue = datePreset.value;
+                const batch = accounts.map(account => ({
+                    method: 'GET',
+                    relative_url: `${account.id}/insights?fields=spend,actions,action_values&date_preset=${datePresetValue}&action_types=['purchase']`
+                }));
+
+                const insightsResponse = await apiRequest('/', { batch: JSON.stringify(batch) }, 'POST');
+                
+                _adAccountsData = insightsResponse.map((res, index) => {
+                    const body = res.body ? JSON.parse(res.body) : {};
+                    const insights = body.data?.[0] || {};
+                    const spend = safeParseFloat(insights.spend);
+                    const revenue = getInsightValue(insights, 'action_values', 'purchase');
+                    const roas = spend > 0 ? revenue / spend : 0;
+                    
+                    return {
+                        id: accounts[index].id,
+                        name: accounts[index].name,
+                        roas: roas
+                    };
+                });
+
+                // 3. Renderizar tabela de Overview
+                renderOverviewTable(_adAccountsData);
+                
+                hideStatus();
+                mainContent.classList.remove('hidden');
+                switchTab('overview', mainTabs, 'main-tab-content-');
+                
+            } catch (err) {
+                handleApiError(err);
+                hideStatus(true); // Mostra mensagem inicial
+            }
+        }
+        
+        // Atualiza dados se o período mudar
+        function handleFilterChange() {
+            if (!_currentAccessToken) {
+                showError("Token não encontrado. Carregue as contas primeiro.");
+                return;
+            }
+            // Recarrega o overview
+            initializeDashboard();
+            
+            // Se uma conta já estava selecionada, recarrega os detalhes dela
+            if (_currentAccountId) {
+                fetchAllData(_currentAccountId);
+            }
+        }
+        
+        // ===================================
+        // FUNÇÕES DE BUSCA E PROCESSAMENTO
+        // ===================================
+
+        async function fetchAllData(adAccountId) {
+            if (!adAccountId) {
+                showError("ID da conta de anúncios não fornecido.");
+                return;
+            }
+            
+            showStatus("Analisando seus dados...", true, 'details-placeholder'); // Mostra loader no placeholder
+            document.getElementById('details-placeholder').classList.remove('hidden');
+            summaryDiv.classList.add('hidden');
+            reportsContainer.classList.add('hidden');
+            insightsContainer.classList.add('hidden');
+
+            try {
+                const entityFields = 'name,status,effective_status,daily_budget';
+                const insightsFields = 'spend,impressions,clicks,cpc,cpm,ctr,frequency,actions,action_values';
+                const adCreativeFields = 'adcreatives{thumbnail_url,body,video_id}';
+                
+                const campaignFields = `${entityFields},adsets{${entityFields},ads{${entityFields},${adCreativeFields},insights{${insightsFields}}}},insights{${insightsFields}}`;
+
+                const params = {
+                    fields: campaignFields,
+                    date_preset: datePreset.value,
+                    limit: 200,
+                    action_types: "['purchase','add_to_cart','initiate_checkout','link_click']"
+                };
+                
+                const response = await apiRequest(`/${adAccountId}/campaigns`, params);
+                const campaignsData = response.data || [];
+
+                if (campaignsData.length === 0) { 
+                    showError(`Nenhuma campanha encontrada no período selecionado para esta conta.`, true, 'details-placeholder');
+                    _allCampaigns = []; _allAdsets = []; _allAds = [];
+                    processAndRenderData([], adAccountId);
+                    return; 
+                }
+                
+                processAndRenderData(campaignsData, adAccountId);
+                hideStatus(true, 'details-placeholder'); // Esconde o placeholder
+                document.getElementById('details-placeholder').classList.add('hidden');
+                summaryDiv.classList.remove('hidden');
+                reportsContainer.classList.remove('hidden');
+
+            } catch (err) {
+                handleApiError(err);
+                showError(err.message, true, 'details-placeholder');
+            }
+        }
+        
+        // ... (Todas as funções de processamento, agregação e utilidade são idênticas às da v5) ...
+        
+        function processAndRenderData(campaignsData, adAccountId) {
+            _allCampaigns = []; _allAdsets = []; _allAds = [];
+            let totalSpend = 0, totalRevenue = 0, totalPurchases = 0;
+
+            campaignsData.forEach(campaign => {
+                const campaignInsights = campaign.insights?.data[0] || {};
+                const insights = aggregateInsights(campaignInsights); 
+                totalSpend += insights.spend;
+                totalRevenue += insights.revenue;
+                totalPurchases += insights.purchases;
+                
+                _allCampaigns.push({ ...campaign, insights });
+
+                campaign.adsets?.data.forEach(adset => {
+                    let adsetAggregated = { spend: 0, revenue: 0, purchases: 0, atc: 0, ic: 0, impressions: 0, clicks: 0, frequency: 0 };
+                    let adCount = 0;
+                    
+                    adset.ads?.data.forEach(ad => {
+                        const adInsights = ad.insights?.data[0] || {};
+                        const processedAdInsights = aggregateInsights(adInsights);
+                        
+                        adsetAggregated.spend += processedAdInsights.spend;
+                        adsetAggregated.revenue += processedAdInsights.revenue;
+                        adsetAggregated.purchases += processedAdInsights.purchases;
+                        adsetAggregated.atc += processedAdInsights.atc;
+                        adsetAggregated.ic += processedAdInsights.ic;
+                        adsetAggregated.impressions += processedAdInsights.impressions;
+                        adsetAggregated.clicks += processedAdInsights.clicks;
+                        adsetAggregated.frequency += processedAdInsights.frequency;
+                        adCount++;
+                        
+                        _allAds.push({ ...ad, insights: processedAdInsights, campaignName: campaign.name, adsetName: adset.name });
+                    });
+                    
+                    adsetAggregated.ctr = adsetAggregated.impressions > 0 ? (adsetAggregated.clicks / adsetAggregated.impressions) * 100 : 0;
+                    adsetAggregated.cvr = adsetAggregated.clicks > 0 ? (adsetAggregated.purchases / adsetAggregated.clicks) : 0;
+                    adsetAggregated.cpa = adsetAggregated.purchases > 0 ? (adsetAggregated.spend / adsetAggregated.purchases) : 0;
+                    adsetAggregated.frequency = adCount > 0 ? adsetAggregated.frequency / adCount : 0;
+                    
+                    _allAdsets.push({ ...adset, insights: adsetAggregated, campaignName: campaign.name });
+                });
+            });
+            
+            // Define o título da conta
+            const account = _adAccountsData.find(acc => acc.id === adAccountId);
+            document.getElementById('details-title').textContent = `Resumo da Conta: ${account ? account.name : ''}`;
+            
+            renderSummary(totalSpend, totalRevenue, totalPurchases);
+            renderTabs();
+            sortAndRenderAllTables();
+            const insights = generateInsights({allAds: _allAds, allAdsets: _allAdsets, totalSpend});
+            renderInsights(insights);
+        }
+        
+        function aggregateInsights(insightsData) {
+            const insights = insightsData || {};
+            const spend = safeParseFloat(insights.spend);
+            const purchases = getInsightValue(insights, 'actions', 'purchase');
+            const revenue = getInsightValue(insights, 'action_values', 'purchase');
+            const atc = getInsightValue(insights, 'actions', 'add_to_cart');
+            const ic = getInsightValue(insights, 'actions', 'initiate_checkout');
+            const clicks = safeParseFloat(insights.clicks);
+            const impressions = safeParseFloat(insights.impressions);
+            const ctr = safeParseFloat(insights.ctr);
+            const cpc = safeParseFloat(insights.cpc);
+            const cpm = safeParseFloat(insights.cpm);
+            const frequency = safeParseFloat(insights.frequency);
+            
+            const roas = spend > 0 ? revenue / spend : 0;
+            const cpa = purchases > 0 ? spend / purchases : 0;
+            const cvr = clicks > 0 ? (purchases / clicks) : 0;
+
+            return {
+                spend, purchases, revenue, atc, ic, clicks, impressions, ctr, cpc, cpm, frequency,
+                roas, cpa, cvr
+            };
+        }
+
+        // ===================================
+        // FUNÇÕES AUXILIARES E DE UTILIDADE
+        // ===================================
+
+        async function apiRequest(path, params = {}, method = 'GET') {
+            if (!_currentAccessToken) {
+                showError("Token de acesso não encontrado. Por favor, insira o token e clique em 'Carregar Contas'.");
+                throw new Error("Usuário não autenticado.");
+            }
+            
+            const url = new URL(`${BASE_URL}${path}`);
+            const options = { method, headers: {} };
+
+            if (method === 'GET') {
+                url.searchParams.append('access_token', _currentAccessToken);
+                for (const key in params) {
+                    url.searchParams.append(key, params[key]);
+                }
+            } else { // POST
+                 options.body = new URLSearchParams();
+                 options.body.append('access_token', _currentAccessToken);
+                 for (const key in params) {
+                    options.body.append(key, params[key]);
+                 }
+            }
+
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (!response.ok) {
+                const error = new Error(data.error?.message || `HTTP error! status: ${response.status}`);
+                error.response = data;
+                throw error;
+            }
+            return data;
+        }
+
+        // Funções de Status e Erro (Layout v1)
+        function showStatus(message, onPlaceholder = false, placeholderId = 'details-placeholder') {
+            if (onPlaceholder) {
+                const placeholder = document.getElementById(placeholderId);
+                placeholder.innerHTML = `<div class="text-center py-20"><div class="loader mx-auto"></div><p class="mt-4 text-text-secondary">${message}</p></div>`;
+            } else {
+                statusDiv.classList.remove('hidden');
+                initialMessage.classList.add('hidden');
+                loaderContainer.classList.remove('hidden');
+                statusText.textContent = message;
+            }
+        }
+
+        function hideStatus(onPlaceholder = false, placeholderId = 'details-placeholder') {
+            if (onPlaceholder) {
+                document.getElementById(placeholderId).classList.add('hidden');
+            } else {
+                statusDiv.classList.add('hidden');
+                loaderContainer.classList.add('hidden');
+            }
+        }
+        
+        function showError(message, onPlaceholder = false, placeholderId = 'details-placeholder') {
+            if (onPlaceholder) {
+                const placeholder = document.getElementById(placeholderId);
+                placeholder.innerHTML = `<div class="text-center py-20"><p class="text-red-400">${message}</p></div>`;
+            } else {
+                errorDiv.classList.remove('hidden');
+                errorDiv.textContent = message;
+            }
+        }
+        
+        function hideError() {
+            errorDiv.classList.add('hidden');
+        }
+        
+        function handleApiError(err) {
+            console.error(err);
+            let errorMessage = err.message;
+            if (err.response && err.response.error) {
+                errorMessage = `Erro da API: ${err.response.error.message} (Código: ${err.response.error.code})`;
+                if (err.response.error.code === 190) { // Token inválido
+                    errorMessage = "Token de acesso inválido ou expirado. Gere um novo token e tente novamente.";
+                }
+            }
+            showError(errorMessage); // Mostra no <div id="error">
+        }
+
+        // ... (Todas as outras funções de formatação, toast, etc., são idênticas às da v5) ...
+        function safeParseFloat(value) { /* ... (igual v5) ... */ }
+        function formatCurrency(value) { /* ... (igual v5) ... */ }
+        function formatNumber(value) { /* ... (igual v5) ... */ }
+        function formatPercentage(value) { /* ... (igual v5) ... */ }
+        function formatSimplePercentage(value) { /* ... (igual v5) ... */ }
+        function formatStatus(status, toggleHTML = null) { /* ... (igual v5) ... */ }
+        function getInsightValue(insights, field, actionType) { /* ... (igual v5) ... */ }
+        
+        // Copiadas da v5
+        safeParseFloat = (value) => { const num = parseFloat(value); return isNaN(num) ? 0 : num; }
+        formatCurrency = (value) => { const num = parseFloat(value); return isNaN(num) ? 'R$ 0,00' : num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        formatNumber = (value) => { const num = parseInt(value); return isNaN(num) ? '0' : num.toLocaleString('pt-BR'); }
+        formatPercentage = (value) => { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${num.toFixed(2).replace('.', ',')}%`; }
+        formatSimplePercentage = (value) => { const num = parseFloat(value); return isNaN(num) ? '0,00%' : `${(num * 100).toFixed(2).replace('.', ',')}%`; }
+        formatStatus = (status, toggleHTML = null) => {
+            if (!status) return `<div class="flex items-center"><span class="status-dot bg-slate-500"></span><span class="text-slate-500">N/A</span></div>`;
+            const colorMap = {'ACTIVE': 'bg-green-500', 'PAUSED': 'bg-yellow-500', 'ARCHIVED': 'bg-slate-600', 'CAMPAIGN_PAUSED': 'bg-yellow-500', 'ADSET_PAUSED': 'bg-yellow-500', 'IN_PROCESS': 'bg-blue-500', 'WITH_ISSUES': 'bg-red-500', 'DISAPPROVED': 'bg-red-600'};
+            const colorClass = colorMap[status] || 'bg-slate-500';
+            const statusText = status.replace(/_/g, ' ');
+            return `<div class="flex items-center gap-4">${toggleHTML || ''}<div class="flex items-center"><span style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 0.5rem;" class="${colorClass}"></span><span>${statusText}</span></div></div>`;
+        }
+        getInsightValue = (insights, field, actionType) => {
+            const source = (field === 'actions' ? insights?.actions : insights?.action_values) || [];
+            const action = source.find(a => a.action_type === actionType);
+            return action ? parseFloat(action.value) : 0;
+        }
+        showToast = (message, type = 'info') => {
+            const toastContainer = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = { info: 'bg-blue-600', success: 'bg-green-600', error: 'bg-red-600' };
+            toast.className = `p-4 rounded-lg text-white shadow-lg ${colors[type]} transform transition-all duration-300 ease-out translate-y-4 opacity-0`;
+            toast.textContent = message;
+            toastContainer.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.remove('translate-y-4'); toast.classList.remove('opacity-0'); });
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
+        }
+
+        // ===================================
+        // FUNÇÕES DE RENDERIZAÇÃO
+        // ===================================
+        
+        // Nova função para renderizar o Overview
+        function renderOverviewTable(accountData) {
+            const container = document.getElementById('main-tab-content-overview');
+             const tableRows = accountData.map(account => {
+                const rowClass = account.roas >= 1 ? 'bg-green-900/10' : (account.spend > 0 ? 'bg-red-900/10' : '');
+                return `
+                    <tr class="data-row ${rowClass} cursor-pointer hover:bg-white/10" data-account-id="${account.id}" title="Clique para ver detalhes">
+                        <td class="text-left">${account.name}</td>
+                        <td class="text-right font-semibold ${account.roas >= 1 ? 'text-success' : 'text-danger'}">${account.roas.toFixed(2)}x</td>
+                    </tr>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="table-custom-wrapper">
+                    <div class="overflow-x-auto">
+                        <table class="table-custom w-full">
+                            <thead><tr>
+                                <th class="text-left">Conta de Anúncios</th>
+                                <th class="text-right">ROAS (Período)</th>
+                            </tr></thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderSummary(spend, revenue, purchases) { /* ... (igual v5) ... */ }
+        function renderTabs() { /* ... (igual v5) ... */ }
+        function sortAndRenderAllTables() { /* ... (igual v5) ... */ }
+        function renderTable(type, data) { /* ... (igual v5) ... */ }
+        function renderInsights(insights) { /* ... (igual v5) ... */ }
+        function renderBreakdownTable(data, type) { /* ... (igual v5) ... */ }
+
+        // Copiadas da v5
+        renderSummary = (spend, revenue, purchases) => {
+             const profit = revenue - spend;
+             const roas = spend > 0 ? revenue / spend : 0;
+             const cpa = purchases > 0 ? spend / purchases : 0;
+             const metrics = [
+                 { label: 'Faturamento', value: formatCurrency(revenue), icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01' },
+                 { label: 'Gasto Total', value: formatCurrency(spend), icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H4a3 3 0 00-3 3v8a3 3 0 003 3z' },
+                 { label: 'ROAS', value: `${roas.toFixed(2)}x`, icon: 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6', color: roas >= 1 ? 'text-success' : 'text-danger' },
+                 { label: 'CPA', value: formatCurrency(cpa), icon: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z' },
+             ];
+             summaryGrid.innerHTML = metrics.map(metric => `
+                <div class="metric-card p-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-medium text-text-secondary">${metric.label}</h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="${metric.icon}" />
+                         </svg>
+                    </div>
+                    <p class="text-3xl font-bold mt-2 ${metric.color || ''}">${metric.value}</p>
+                </div>`).join('');
+        }
+        renderTabs = () => {
+            document.getElementById('detail-tabs').innerHTML = `
+                <button class="tab-button active" data-tab="campaigns">Campanhas (${_allCampaigns.length})</button>
+                <button class="tab-button" data-tab="adsets">Conjuntos (${_allAdsets.length})</button>
+                <button class="tab-button" data-tab="ads">Anúncios (${_allAds.length})</button>
+            `;
+            reportsContainer.classList.remove('hidden');
+            switchTab('campaigns', document.getElementById('detail-tabs'), 'detail-tab-content-');
+        }
+        sortAndRenderAllTables = () => {
+            const sortByValue = sortBy.value;
+            const sortFn = (a, b) => {
+                const aInsights = a.insights; const bInsights = b.insights;
+                switch(sortByValue) {
+                    case 'purchases': return bInsights.purchases - aInsights.purchases;
+                    case 'spend': return bInsights.spend - aInsights.spend;
+                    case 'cpa':
+                        const aCpa = aInsights.cpa === 0 ? Infinity : aInsights.cpa;
+                        const bCpa = bInsights.cpa === 0 ? Infinity : bInsights.cpa;
+                        return aCpa - bCpa;
+                    case 'roas': default: return bInsights.roas - aInsights.roas;
+                }
+            };
+            renderTable('campaigns', [..._allCampaigns].sort(sortFn));
+            renderTable('adsets', [..._allAdsets].sort(sortFn));
+            renderTable('ads', [..._allAds].sort(sortFn));
+            handleTableFilter(getActiveTabId());
+            updateSelection();
+        }
+        renderTable = (type, data) => {
+            const container = document.getElementById(`detail-tab-content-${type}`);
+            const isAdTable = type === 'ads';
+            const tableHeaders = `
+                <th class="w-1/12"><input type="checkbox" class="select-all-checkbox" data-type="${type}"></th>
+                <th class="w-4/12">${type === 'campaigns' ? 'Campanha' : (type === 'adsets' ? 'Conjunto' : 'Anúncio')}</th>
+                ${isAdTable ? '<th class="w-1/12 text-center">Criativo</th>' : ''}
+                <th class="w-2/12">Status</th>
+                <th class="w-1/12 text-right">${type === 'campaigns' ? 'Orçamento' : 'Gasto'}</th>
+                <th class="w-1/12 text-right">Vendas</th><th class="w-1/12 text-right">ROAS</th><th class="w-1/12 text-right">CPA</th>
+                <th class="w-1/12 text-right">CVR</th><th class="w-1/12 text-right">CTR</th><th class="w-1/12 text-right">Freq.</th>
+                <th class="w-1/12 text-right">Cliques</th><th class="w-1/12 text-right">CPC</th><th class="w-2/12 text-center">Ações</th>
+            `;
+            const tableRows = data.map(item => {
+                const insights = item.insights || {}; const creative = item.adcreatives?.data[0] || {};
+                let rowClass = 'data-row';
+                if (insights.spend > 0) { rowClass += insights.roas >= 1 ? ' bg-green-900/10' : ' bg-red-900/10'; }
+                const creativeHTML = isAdTable ? `<td class="text-center">
+                        ${creative.thumbnail_url ? `<img src="${creative.thumbnail_url}" alt="Criativo" class="h-10 w-10 rounded-md cursor-pointer hover:scale-110 transition-transform inline-block object-cover" onclick="showCreativePreview('${creative.thumbnail_url}', \`${(creative.body || '').replace(/`/g, '\\`')}\`)">` : '<span class="text-text-secondary text-xs">N/A</span>'}
+                       </td>` : '';
+                const toggleType = type === 'ads' ? 'ad' : (type === 'campaigns' ? 'campaign' : '');
+                const statusToggle = toggleType ? `<label class="toggle-switch relative inline-block w-10 h-[22px]">
+                        <input type="checkbox" class="status-toggle opacity-0 w-0 h-0" data-id="${item.id}" data-type="${toggleType}" ${item.status === 'ACTIVE' ? 'checked' : ''}>
+                        <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-600 transition-all rounded-full before:absolute before:content-[''] before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-white before:transition-all before:rounded-full"></span>
+                    </label>` : null;
+                const budgetHTML = type === 'campaigns' ? `<span class="budget-value" data-id="${item.id}" data-budget="${item.daily_budget}">${formatCurrency(item.daily_budget / 100)}</span> <button class="edit-budget-btn ml-1 text-text-secondary hover:text-white" data-id="${item.id}">✏️</button>` : formatCurrency(insights.spend);
+                const cpaColor = insights.cpa > 0 ? 'text-text-primary' : 'text-text-secondary';
+                const cvrColor = insights.cvr > 0 ? 'text-text-primary' : 'text-text-secondary';
+                const placementButton = type !== 'ads' ? `<button class="action-btn breakdown-placement-btn" title="Ver Posicionamento" data-id="${item.id}" data-name="${item.name}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg></button>` : '';
+                return `<tr class="${rowClass}">
+                        <td class="text-center"><input type="checkbox" class="row-checkbox form-input !bg-card !border-border-color" data-id="${item.id}" data-type="${type}"></td>
+                        <td class="text-left"><div class="max-w-xs truncate" title="${item.name}">${item.name}</div>${type !== 'campaigns' ? `<div class="text-xs text-text-secondary max-w-xs truncate" title="Campanha: ${item.campaignName}">Campanha: ${item.campaignName}</div>` : ''}</td>
+                        ${creativeHTML}<td class="text-left">${formatStatus(item.effective_status, statusToggle)}</td>
+                        <td class="text-right">${budgetHTML}</td><td class="text-right">${formatNumber(insights.purchases)}</td>
+                        <td class="text-right font-semibold ${insights.roas >= 1 ? 'text-success' : 'text-danger'}">${insights.roas.toFixed(2)}x</td>
+                        <td class="text-right ${cpaColor}">${formatCurrency(insights.cpa)}</td><td class="text-right ${cvrColor}">${formatSimplePercentage(insights.cvr)}</td>
+                        <td class="text-right">${formatPercentage(insights.ctr)}</td><td class="text-right">${(insights.frequency || 0).toFixed(2)}</td>
+                        <td class="text-right">${formatNumber(insights.clicks)}</td><td class="text-right">${formatCurrency(insights.cpc)}</td>
+                        <td class="text-center space-x-1">
+                            <button class="action-btn duplicate-btn" title="Duplicar" data-id="${item.id}" data-type="${type}" data-name="${item.name}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg></button>
+                            <button class="action-btn breakdown-age-btn" title="Ver Público (Idade/Gênero)" data-id="${item.id}" data-name="${item.name}"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg></button>
+                            ${placementButton}
+                        </td></tr>`;
+            }).join('');
+            container.innerHTML = `<div class="table-custom-wrapper"><div class="overflow-x-auto">
+                        <table class="table-custom w-full"><thead><tr>${tableHeaders}</tr></thead>
+                        <tbody>${tableRows.length > 0 ? tableRows : `<tr><td colspan="${isAdTable ? 17 : 16}" class="text-center py-8 text-text-secondary">Nenhum dado encontrado.</td></tr>`}</tbody>
+                        </table></div></div>`;
+        }
+        renderInsights = (insights) => {
+            if (insights.length === 0) { insightsContainer.classList.add('hidden'); return; }
+            const insightTemplates = {
+                winner: (ad) => ({ title: "🏆 Criativo Campeão de Vendas", recommendation: "Este é seu criativo validado. Aumente o orçamento neste conjunto ou crie variações dele para escalar." }),
+                efficient: (ad) => ({ title: "💰 Criativo Mais Eficiente (ROAS)", recommendation: "Este criativo é altamente lucrativo. Analise seus elementos para replicar o sucesso em novos anúncios." }),
+                gem: (ad) => ({ title: "💎 Oportunidade de Escala", recommendation: "Este anúncio tem um ROAS excelente com baixo gasto. Considere aumentar seu orçamento gradualmente para escalar os lucros." }),
+                leak: (ad) => ({ title: "🔥 Alerta de Vazamento", recommendation: `Este anúncio gastou ${formatCurrency(ad.insights.spend)} sem nenhuma venda. Pause-o imediatamente para estancar o prejuízo.` }),
+                saturation: (ad) => ({ title: "🥵 Alerta de Saturação", recommendation: `A frequência deste conjunto é ${ad.insights.frequency.toFixed(2)}, indicando que o público está vendo os mesmos anúncios. Troque os criativos ou o público.` })
+            };
+            insightsGrid.innerHTML = insights.map(insight => {
+                const { ad, name, type } = insight; const template = insightTemplates[name](ad);
+                let thumbUrl = ad.adcreatives?.data[0]?.thumbnail_url;
+                if(name === 'saturation') { const firstAd = _allAds.find(a => a.adsetName === ad.name); thumbUrl = firstAd?.adcreatives?.data[0]?.thumbnail_url; }
+                return `<div class="insight-card ${type} p-6 flex flex-col sm:flex-row gap-6 items-center"><div class="flex-shrink-0"><img src="${thumbUrl || 'https://placehold.co/100x100/181818/a3a3a3?text=N/A'}" class="w-24 h-24 rounded-md object-cover shadow-lg"></div>
+                    <div class="flex-1"><h3 class="insight-title ${type} font-bold text-lg">${template.title}</h3><p class="text-sm text-text-primary font-medium truncate" title="${ad.name}">${ad.name}</p>
+                        <div class="text-xs text-text-secondary grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1 mt-2">
+                            <span>Vendas: <strong class="text-white">${formatNumber(ad.insights.purchases)}</strong></span><span>ROAS: <strong class="${ad.insights.roas >= 1 ? 'text-success' : 'text-danger'}">${ad.insights.roas.toFixed(2)}x</strong></span>
+                            <span>CPA: <strong class="text-white">${formatCurrency(ad.insights.cpa)}</strong></span><span>Gasto: <strong class="text-white">${formatCurrency(ad.insights.spend)}</strong></span>
+                        </div><p class="text-sm text-accent-primary mt-3">${template.recommendation}</p></div></div>`;
+            }).join('');
+             insightsContainer.classList.remove('hidden');
+        }
+        renderBreakdownTable = (data, type) => {
+            const modalData = document.getElementById('breakdown-modal-data');
+             if (!data || data.length === 0) { modalData.innerHTML = `<p class="text-text-secondary text-center py-4">Nenhum dado de breakdown encontrado.</p>`; return; }
+             let headers = '', rows = '';
+             if (type === 'age,gender') {
+                headers = `<th class="text-left">Gênero</th><th class="text-left">Idade</th><th class="text-right">Gasto</th><th class="text-right">Vendas</th><th class="text-right">CPA</th><th class="text-right">ROAS</th>`;
+                rows = data.map(item => {
+                    const insights = aggregateInsights(item); const genderMap = { 'male': 'Masc', 'female': 'Fem', 'unknown': 'Desc' };
+                    return `<tr class="${insights.roas >= 1 ? 'text-success' : (insights.spend > 0 ? 'text-danger' : '')}"><td class="text-left">${genderMap[item.gender] || 'N/A'}</td><td class="text-left">${item.age || 'N/A'}</td><td class="text-right">${formatCurrency(insights.spend)}</td><td class="text-right">${formatNumber(insights.purchases)}</td><td class="text-right">${formatCurrency(insights.cpa)}</td><td class="text-right font-bold">${insights.roas.toFixed(2)}x</td></tr>`;
+                }).join('');
+             } else if (type === 'placement') {
+                headers = `<th class="text-left">Posicionamento</th><th class="text-right">Gasto</th><th class="text-right">Vendas</th><th class="text-right">CPA</th><th class="text-right">ROAS</th>`;
+                const placementMap = {'facebook_feed': 'Feed do Facebook', 'instagram_feed': 'Feed do Instagram', 'instagram_stories': 'Stories do Instagram', 'facebook_stories': 'Stories do Facebook'};
+                rows = data.map(item => {
+                    const insights = aggregateInsights(item); const placementName = placementMap[item.placement] || item.placement.replace(/_/g, ' ');
+                    return `<tr class="${insights.roas >= 1 ? 'text-success' : (insights.spend > 0 ? 'text-danger' : '')}"><td class="text-left">${placementName}</td><td class="text-right">${formatCurrency(insights.spend)}</td><td class="text-right">${formatNumber(insights.purchases)}</td><td class="text-right">${formatCurrency(insights.cpa)}</td><td class="text-right font-bold">${insights.roas.toFixed(2)}x</td></tr>`;
+                }).join('');
+             }
+             modalData.innerHTML = `<div class="table-custom-wrapper"><table class="table-custom w-full"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+
+        // ===================================
+        // FUNÇÕES DE AÇÃO E EVENTOS
+        // ===================================
+        
+        function setupModalCloseListeners() { /* ... (igual v5) ... */ }
+        function setupActionListeners() { /* ... (igual v5) ... */ }
+        async function handleBudgetEdit(campaignId, currentBudget) { /* ... (igual v5) ... */ }
+        function switchTab(tabId, tabContainer, contentPrefix) { /* ... (adaptado do v1) ... */ }
+        function getActiveTabId() { /* ... (igual v5) ... */ }
+        async function updateStatus(objectId, newStatus) { /* ... (igual v5) ... */ }
+        async function updateBudget(campaignId, newBudgetInCents) { /* ... (igual v5) ... */ }
+        async function duplicateObject(id, type, name) { /* ... (igual v5) ... */ }
+        function getSelectedIds() { /* ... (igual v5) ... */ }
+        function updateSelection() { /* ... (igual v5) ... */ }
+        async function performBulkAction(status) { /* ... (igual v5) ... */ }
+        function handleTableFilter(activeTabId) { /* ... (igual v5) ... */ }
+        function showCreativePreview(imageUrl, adText) { /* ... (igual v5) ... */ }
+        function closeCreativePreview() { /* ... (igual v5) ... */ }
+        async function showBreakdownModal(id, name, breakdownType, title) { /* ... (igual v5) ... */ }
+        function closeBreakdownModal() { /* ... (igual v5) ... */ }
+        function generateInsights(processedData) { /* ... (igual v5) ... */ }
+
+        // Copiadas da v5
+        setupModalCloseListeners = () => {
+            document.getElementById('creative-modal-backdrop').addEventListener('click', closeCreativePreview);
+            document.getElementById('creative-modal-close').addEventListener('click', closeCreativePreview);
+            document.getElementById('breakdown-modal-backdrop').addEventListener('click', closeBreakdownModal);
+            document.getElementById('breakdown-modal-close').addEventListener('click', closeBreakdownModal);
+        }
+        setupActionListeners = () => {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.addEventListener('click', async (e) => {
+                 if (e.target.closest('.edit-budget-btn')) {
+                     const campaignId = e.target.closest('.edit-budget-btn').dataset.id;
+                     const budgetElement = document.querySelector(`.budget-value[data-id="${campaignId}"]`);
+                     await handleBudgetEdit(campaignId, budgetElement.dataset.budget);
+                 }
+                if (e.target.closest('.duplicate-btn')) {
+                    const btn = e.target.closest('.duplicate-btn');
+                    await duplicateObject(btn.dataset.id, btn.dataset.type, btn.dataset.name);
+                }
+                if (e.target.closest('.breakdown-age-btn')) {
+                    const btn = e.target.closest('.breakdown-age-btn');
+                    await showBreakdownModal(btn.dataset.id, btn.dataset.name, 'age,gender', 'Análise de Público');
+                }
+                if (e.target.closest('.breakdown-placement-btn')) {
+                    const btn = e.target.closest('.breakdown-placement-btn');
+                    await showBreakdownModal(btn.dataset.id, btn.dataset.name, 'placement', 'Análise de Posicionamento');
+                }
+                if (e.target.matches('.row-checkbox, .select-all-checkbox')) {
+                    updateSelection();
+                }
+            });
+            resultsDiv.addEventListener('change', async (e) => {
+                if (e.target.matches('.status-toggle')) {
+                    const id = e.target.dataset.id; const newStatus = e.target.checked ? 'ACTIVE' : 'PAUSED';
+                    if (confirm(`Tem certeza que deseja ${newStatus === 'ACTIVE' ? 'ativar' : 'pausar'} este item?`)) { await updateStatus(id, newStatus); } else { e.target.checked = !e.target.checked; }
+                }
+                if (e.target.matches('.select-all-checkbox')) {
+                    const type = e.target.dataset.type;
+                    const activeTabContent = document.getElementById(`detail-tab-content-${type}`);
+                    const allCheckboxes = activeTabContent.querySelectorAll('.row-checkbox');
+                    allCheckboxes.forEach(cb => { cb.checked = e.target.checked; });
+                    updateSelection();
+                }
+            });
+            document.getElementById('bulk-action-bar').addEventListener('click', (e) => {
+                 if (e.target.id === 'bulk-activate-btn') performBulkAction('ACTIVE');
+                 if (e.target.id === 'bulk-pause-btn') performBulkAction('PAUSED');
+            });
+        }
+        handleBudgetEdit = async (campaignId, currentBudget) => {
+             const newBudgetString = prompt("Digite o novo orçamento diário (Ex: 50.50):", (currentBudget / 100).toFixed(2));
+             if (newBudgetString !== null) {
+                 const newBudget = parseFloat(newBudgetString);
+                 if (!isNaN(newBudget) && newBudget > 0) { await updateBudget(campaignId, newBudget * 100); } else { alert("Valor de orçamento inválido."); }
+             }
+        }
+        switchTab = (tabId, tabContainer, contentPrefix) => {
+            tabContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            const button = tabContainer.querySelector(`.tab-button[data-tab="${tabId}"]`);
+            if (button) button.classList.add('active');
+            document.querySelectorAll(`[id^="${contentPrefix}"]`).forEach(content => content.classList.remove('active'));
+            const activeContent = document.getElementById(`${contentPrefix}${tabId}`);
+            if (activeContent) activeContent.classList.add('active');
+            if (contentPrefix === 'detail-tab-content-') { handleTableFilter(tabId); updateSelection(); }
+        }
+        getActiveTabId = () => {
+            const activeTabButton = document.querySelector('#detail-tabs .tab-button.active');
+            return activeTabButton ? activeTabButton.dataset.tab : null;
+        }
+        updateStatus = async (objectId, newStatus) => {
+            showToast('Atualizando status...', 'info');
+            try {
+                await apiRequest(`/${objectId}`, { status: newStatus }, 'POST');
+                showToast('Status atualizado com sucesso!', 'success');
+                await fetchAllData(_currentAccountId); 
+            } catch (err) {
+                showToast('Falha ao atualizar status.', 'error'); handleApiError(err); await fetchAllData(_currentAccountId);
+            }
+        }
+        updateBudget = async (campaignId, newBudgetInCents) => {
+            showToast('Atualizando orçamento...', 'info');
+             try {
+                await apiRequest(`/${campaignId}`, { daily_budget: newBudgetInCents }, 'POST');
+                showToast('Orçamento atualizado com sucesso!', 'success');
+                const budgetElement = document.querySelector(`.budget-value[data-id="${campaignId}"]`);
+                if (budgetElement) { budgetElement.textContent = formatCurrency(newBudgetInCents / 100); budgetElement.dataset.budget = newBudgetInCents; }
+            } catch (err) {
+                showToast('Falha ao atualizar orçamento.', 'error'); handleApiError(err);
+            }
+        }
+        duplicateObject = async (id, type, name) => {
+            const numCopiesStr = prompt(`Quantas cópias de "${name}" você quer criar?`, "1");
+            const numCopies = parseInt(numCopiesStr);
+            if (isNaN(numCopies) || numCopies < 1) return;
+            const renamePrefix = prompt("Qual o prefixo para as cópias? (Ex: 'Teste ROAS - ')", `Cópia - `);
+            if (renamePrefix === null) return;
+            showToast(`Duplicando ${name} (${numCopies}x)...`, 'info');
+            try {
+                await apiRequest(`/${id}/copies`, { status: 'PAUSED', rename_prefix: renamePrefix, number_of_copies: numCopies }, 'POST');
+                showToast('Itens duplicados com sucesso!', 'success');
+                await fetchAllData(_currentAccountId);
+            } catch (err) {
+                showToast('Falha ao duplicar.', 'error'); handleApiError(err);
+            }
+        }
+        getSelectedIds = () => {
+            const activeTabId = getActiveTabId();
+            if (!activeTabId) return [];
+            const activeTabContent = document.getElementById(`detail-tab-content-${activeTabId}`);
+            const checkboxes = activeTabContent.querySelectorAll('.row-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.dataset.id);
+        }
+        updateSelection = () => {
+            const actionBar = document.getElementById('bulk-action-bar');
+            const activeTabId = getActiveTabId();
+            if (!activeTabId) { actionBar.classList.add('hidden'); return; }
+            const activeTabContent = document.getElementById(`detail-tab-content-${activeTabId}`);
+            const allCheckboxes = activeTabContent.querySelectorAll('.row-checkbox');
+            const selectAllCheckbox = activeTabContent.querySelector('thead .select-all-checkbox');
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length > 0) {
+                actionBar.classList.remove('hidden');
+                actionBar.innerHTML = `<div><span class="font-semibold text-lg text-white">${selectedIds.length}</span> <span class="text-text-secondary">itens selecionados</span></div>
+                    <div class="space-x-2"><button id="bulk-activate-btn" class="btn-secondary py-2 px-4 text-sm font-semibold !text-success !border-success hover:!border-success hover:!text-success">Ativar</button>
+                    <button id="bulk-pause-btn" class="btn-secondary py-2 px-4 text-sm font-semibold !text-warning !border-warning hover:!border-warning hover:!text-warning">Pausar</button></div>`;
+            } else {
+                actionBar.classList.add('hidden');
+            }
+            if (selectAllCheckbox) {
+                const visibleCheckboxes = Array.from(allCheckboxes).filter(cb => cb.closest('tr').style.display !== 'none');
+                selectAllCheckbox.checked = visibleCheckboxes.length > 0 && selectedIds.length === visibleCheckboxes.length;
+            }
+        }
+        performBulkAction = async (status) => {
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length === 0) return;
+            const actionText = status === 'ACTIVE' ? 'ativar' : 'pausar';
+            if (!confirm(`Tem certeza que deseja ${actionText} ${selectedIds.length} item(ns)?`)) return;
+            showToast(`Enviando ${selectedIds.length} ações...`, 'info');
+            const batch = selectedIds.map(id => ({ method: 'POST', relative_url: `${id}`, body: `status=${status}` }));
+            try {
+                await apiRequest('/', { batch: JSON.stringify(batch) }, 'POST');
+                showToast('Ações em massa concluídas!', 'success');
+                await fetchAllData(_currentAccountId);
+            } catch (err) {
+                showToast('Falha em algumas ações.', 'error'); handleApiError(err); await fetchAllData(_currentAccountId);
+            }
+        }
+        handleTableFilter = (activeTabId) => {
+            const filterValue = tableFilterInput.value.toLowerCase();
+            if (!activeTabId) return;
+            const tableBody = document.querySelector(`#detail-tab-content-${activeTabId} tbody`);
+            if (!tableBody) return;
+            const rows = tableBody.querySelectorAll('tr.data-row');
+            rows.forEach(row => {
+                const nameCell = row.querySelector('td:nth-child(2) div:first-child');
+                if (nameCell) { const name = nameCell.title.toLowerCase(); row.style.display = name.includes(filterValue) ? '' : 'none'; }
+            });
+            updateSelection();
+        }
+        showCreativePreview = (imageUrl, adText) => {
+            document.getElementById('creative-modal-img').src = imageUrl;
+            document.getElementById('creative-modal-text').textContent = adText;
+            creativeModal.classList.add('flex');
+        }
+        closeCreativePreview = () => { creativeModal.classList.remove('flex'); }
+        showBreakdownModal = async (id, name, breakdownType, title) => {
+            breakdownModal.classList.add('flex');
+            document.getElementById('breakdown-modal-loader').classList.remove('hidden');
+            document.getElementById('breakdown-modal-data').innerHTML = '';
+            document.getElementById('breakdown-modal-title').textContent = `${title}: ${name}`;
+            try {
+                const params = { date_preset: datePreset.value, breakdowns: breakdownType, fields: 'spend,actions,action_values', action_types: "['purchase']" };
+                const response = await apiRequest(`/${id}/insights`, params);
+                renderBreakdownTable(response.data, breakdownType);
+            } catch (err) {
+                 document.getElementById('breakdown-modal-data').innerHTML = `<p class="text-red-400">Falha ao buscar dados de breakdown.</p>`; console.error(err);
+            } finally {
+                document.getElementById('breakdown-modal-loader').classList.add('hidden');
+            }
+        }
+        closeBreakdownModal = () => { breakdownModal.classList.remove('flex'); }
+        generateInsights = (processedData) => {
+            const { allAds, allAdsets, totalSpend } = processedData; let insights = [];
+            const VAZAMENTO_GASTO_MINIMO = 50; const SATURACAO_FREQ_MINIMA = 3.5;
+            if (allAds.length === 0) return insights;
+            const adsWithPurchases = allAds.filter(a => a.insights.purchases > 0);
+            if (adsWithPurchases.length > 0) {
+                const winnerAd = [...adsWithPurchases].sort((a, b) => b.insights.purchases - a.insights.purchases)[0];
+                insights.push({ type: 'success', name: 'winner', ad: winnerAd });
+                const efficientAd = [...adsWithPurchases].sort((a, b) => b.insights.roas - a.insights.roas)[0];
+                if (efficientAd.id !== winnerAd.id) { insights.push({ type: 'success', name: 'efficient', ad: efficientAd }); }
+                const hiddenGem = allAds.find(ad => ad.insights.roas > 3.0 && ad.insights.spend < (totalSpend * 0.05) && ad.insights.spend > 0);
+                if(hiddenGem) { insights.push({ type: 'success', name: 'gem', ad: hiddenGem }); }
+            }
+            const leaks = allAds.filter(ad => ad.status === 'ACTIVE' && ad.insights.spend > VAZAMENTO_GASTO_MINIMO && ad.insights.purchases === 0).sort((a, b) => b.insights.spend - a.insights.spend);
+            if(leaks.length > 0) { insights.push({ type: 'danger', name: 'leak', ad: leaks[0] }); }
+            const saturated = allAdsets.filter(adset => adset.status === 'ACTIVE' && adset.insights.frequency > SATURACAO_FREQ_MINIMA).sort((a, b) => b.insights.frequency - a.insights.frequency);
+            if(saturated.length > 0) { insights.push({ type: 'warning', name: 'saturation', ad: saturated[0] }); }
+            return insights.sort((a,b) => (a.type === 'danger' ? -1 : (a.type === 'warning' ? 0 : 1)));
+        }
+
+    </script>
+
+</body>
+</html>
