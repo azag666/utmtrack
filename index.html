@@ -98,6 +98,12 @@
             <p class="text-text-secondary" id="loading-text">Comunicando com a Graph API...</p>
         </div>
 
+        <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-4 rounded-lg mb-6 flex flex-col items-center text-center">
+            <svg class="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <strong class="font-bold block text-lg">Erro na API da Meta</strong>
+            <span class="block text-sm mt-1" id="error-text">Ocorreu um erro ao buscar os dados.</span>
+        </div>
+
         <div id="dashboard-content" class="hidden space-y-6">
             <nav id="main-tabs" class="flex border-b border-border-color">
                 <button class="tab-button active" data-tab="accounts">Gerenciadores de Anúncios</button>
@@ -165,11 +171,11 @@
                     Autenticar Oficialmente (OAuth)
                 </a>
                 
-                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN EAAG</span><div class="flex-grow border-t border-border-color"></div></div>
+                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN (Avançado)</span><div class="flex-grow border-t border-border-color"></div></div>
                 
                 <div class="space-y-3">
                     <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Principal)">
-                    <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso (EAAG...)">
+                    <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso Mestre (EAAG...)">
                     <button id="save-profile-btn" class="btn-outline w-full py-2">Salvar Token Localmente</button>
                 </div>
             </div>
@@ -182,19 +188,20 @@
         // ESTADO GLOBAL
         let profiles = JSON.parse(localStorage.getItem('hottrack_profiles')) || [];
         let currentToken = null;
-        let currentAccountId = null; // Guardará o ID com o prefixo 'act_'
+        let currentAccountId = null;
         
         const UI = {
             welcome: document.getElementById('welcome-state'),
             loader: document.getElementById('loading-state'),
             dash: document.getElementById('dashboard-content'),
             selector: document.getElementById('profile-selector'),
-            modalProfile: document.getElementById('add-profile-modal')
+            modalProfile: document.getElementById('add-profile-modal'),
+            errorAlert: document.getElementById('error-alert'),
+            errorText: document.getElementById('error-text')
         };
 
         // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
-            // Captura de Token via OAuth Hash
             const hash = window.location.hash;
             if (hash && hash.includes('access_token')) {
                 const params = new URLSearchParams(hash.substring(1));
@@ -206,7 +213,6 @@
 
             renderProfileSelector();
 
-            // Listeners Iniciais
             document.getElementById('btn-big-connect').addEventListener('click', () => UI.modalProfile.classList.add('flex'));
             document.getElementById('btn-add-profile').addEventListener('click', () => UI.modalProfile.classList.add('flex'));
             document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', () => UI.modalProfile.classList.remove('flex')));
@@ -218,6 +224,7 @@
             });
 
             UI.selector.addEventListener('change', (e) => {
+                UI.errorAlert.classList.add('hidden'); // Esconde o erro ao trocar perfil
                 if(e.target.value) { currentToken = e.target.value; loadAccounts(); }
                 else { currentToken = null; UI.dash.classList.add('hidden'); UI.welcome.classList.remove('hidden'); }
             });
@@ -235,7 +242,6 @@
                 }
             });
 
-            // AÇÃO DE API: Criar Campanha
             document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
         });
 
@@ -273,9 +279,18 @@
             const data = await res.json();
             if(data.error) {
                 console.error("API Error:", data.error);
-                throw new Error(data.error.message);
+                throw new Error(`${data.error.message} (Código: ${data.error.code})`);
             }
             return data;
+        }
+
+        function handleVisualError(message) {
+            UI.loader.classList.add('hidden');
+            UI.dash.classList.add('hidden');
+            UI.welcome.classList.add('hidden');
+            
+            UI.errorText.textContent = message;
+            UI.errorAlert.classList.remove('hidden');
         }
 
         // ==========================================
@@ -284,8 +299,10 @@
         async function loadAccounts() {
             UI.welcome.classList.add('hidden');
             UI.dash.classList.add('hidden');
+            UI.errorAlert.classList.add('hidden');
+            UI.loader.classList.remove('hidden');
             UI.loader.classList.add('flex');
-            document.getElementById('loading-text').textContent = "Buscando Contas de Anúncio (ads_read)...";
+            document.getElementById('loading-text').textContent = "Buscando Contas de Anúncio...";
 
             try {
                 const res = await apiCall('/me/adaccounts', { fields: 'account_id,name,account_status' });
@@ -307,11 +324,11 @@
                     </div>`;
                 
                 UI.loader.classList.remove('flex');
+                UI.loader.classList.add('hidden');
                 UI.dash.classList.remove('hidden');
                 document.querySelector('.tab-button[data-tab="accounts"]').click();
             } catch (err) {
-                UI.loader.classList.remove('flex');
-                showToast(err.message, 'error');
+                handleVisualError(err.message);
             }
         }
 
@@ -335,7 +352,6 @@
                 const res = await apiCall(`/${accountId}/campaigns`, params);
                 const campaigns = res.data || [];
 
-                // Filtra deletadas para manter painel limpo
                 const activeCamps = campaigns.filter(c => c.status !== 'DELETED');
 
                 tbody.innerHTML = activeCamps.map(camp => {
@@ -381,15 +397,13 @@
                 }).join('') || '<tr><td colspan="8" class="text-center text-text-secondary">Nenhuma campanha ativa encontrada.</td></tr>';
 
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-red-400">Erro: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-red-500 font-bold">Erro: ${err.message}</td></tr>`;
             }
         }
 
         // ==========================================
         // FUNÇÕES DE AÇÃO DA API (ads_management)
         // ==========================================
-
-        // 1. Alternar Status (Pausar/Ativar)
         async function actionToggleStatus(id, checkbox) {
             const newStatus = checkbox.checked ? 'ACTIVE' : 'PAUSED';
             try {
@@ -402,7 +416,6 @@
             }
         }
 
-        // 2. Renomear Campanha
         async function actionRename(id, currentName) {
             const newName = prompt("Renomear Campanha para:", currentName);
             if(newName && newName !== currentName) {
@@ -415,7 +428,6 @@
             }
         }
 
-        // 3. Editar Orçamento Diário
         async function actionEditBudget(id, currentBudgetInCents) {
             const currentFormatted = currentBudgetInCents ? (currentBudgetInCents/100).toFixed(2) : "100.00";
             const newVal = prompt("Novo orçamento diário (Ex: 50.00):", currentFormatted);
@@ -429,7 +441,6 @@
             }
         }
 
-        // 4. Arquivar Campanha
         async function actionArchive(id) {
             if(confirm("Deseja ARQUIVAR esta campanha na Meta? Ela sumirá do painel ativo.")) {
                 try {
@@ -441,7 +452,6 @@
             }
         }
 
-        // 5. Duplicar Campanha
         async function actionDuplicate(id) {
             if(confirm("Deseja criar uma CÓPIA pausada desta campanha?")) {
                 try {
@@ -453,7 +463,6 @@
             }
         }
 
-        // 6. Criar Campanha do Zero (Shell)
         async function createCampaign() {
             if(!currentAccountId) return;
             const campName = prompt("Nome da nova campanha:");
@@ -461,25 +470,22 @@
 
             try {
                 showToast(`Enviando POST /campaigns (Criando)...`, 'info');
-                // Parâmetros obrigatórios para criar campanha de Vendas na Meta
                 const params = {
                     name: campName,
                     objective: 'OUTCOME_SALES',
                     status: 'PAUSED',
-                    special_ad_categories: '[]' // Exigido pela Meta para todas as campanhas novas
+                    special_ad_categories: '[]'
                 };
                 
                 await apiCall(`/${currentAccountId}/campaigns`, params, 'POST');
                 showToast('Campanha criada com sucesso!', 'success');
                 
-                // Recarrega a tabela para mostrar a nova campanha
                 setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
             } catch (err) {
                 showToast('Falha ao criar: ' + err.message, 'error');
             }
         }
 
-        // Toast Helper
         function showToast(msg, type='info') {
             const toast = document.createElement('div');
             toast.className = `p-3 rounded shadow-lg text-white text-sm transform transition-all duration-300 translate-y-4 opacity-0 ${type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-blue-600'}`;
