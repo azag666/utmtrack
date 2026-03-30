@@ -35,8 +35,6 @@
         input:checked + .slider:before { transform: translateX(16px); }
         .action-icon { cursor: pointer; opacity: 0.7; transition: 0.2s; font-size: 1rem; }
         .action-icon:hover { opacity: 1; transform: scale(1.1); }
-        
-        /* Checkbox Customizado */
         .row-checkbox { width: 16px; height: 16px; accent-color: var(--accent-primary); cursor: pointer; }
     </style>
 </head>
@@ -89,7 +87,7 @@
         <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-lg mb-6 flex-col items-center text-center shadow-xl">
             <svg class="w-12 h-12 mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <strong class="font-bold block text-xl mb-2 text-white">Erro na Graph API</strong>
-            <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words" id="error-text">Mensagem do erro aqui</p>
+            <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words mt-2" id="error-text">Mensagem do erro aqui</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
@@ -236,7 +234,7 @@
 
             document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
 
-            // Listener Select All
+            // Listener Select All para Bulk Actions
             document.getElementById('select-all').addEventListener('change', (e) => {
                 const checkboxes = document.querySelectorAll('.camp-checkbox');
                 checkboxes.forEach(cb => cb.checked = e.target.checked);
@@ -337,7 +335,6 @@
             const tbody = document.getElementById('campaigns-tbody');
             tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-text-secondary animate-pulse">Baixando métricas avançadas...</td></tr>';
             
-            // Esconde barra em lote ao recarregar
             document.getElementById('bulk-action-bar').classList.add('hidden');
             document.getElementById('select-all').checked = false;
 
@@ -399,7 +396,6 @@
                     `;
                 }).join('') || '<tr><td colspan="9" class="text-center text-text-secondary py-6">Nenhuma campanha rodando.</td></tr>';
 
-                // Atualiza Resumo
                 document.getElementById('summary-spend').textContent = totalSpend.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
                 document.getElementById('summary-purchases').textContent = totalPurchases;
                 document.getElementById('summary-cpa').textContent = (totalPurchases > 0 ? totalSpend/totalPurchases : 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -411,15 +407,42 @@
         }
 
         // ==========================================
-        // FUNÇÕES DE AÇÃO DA API (INDIVIDUAIS)
+        // FUNÇÕES DE AÇÃO DA API (CRIAR E ATUALIZAR)
         // ==========================================
+        async function createCampaign() {
+            if(!currentAccountId) return;
+            const campName = prompt("Nome da nova campanha:");
+            if(!campName) return;
+
+            try {
+                showToast(`Enviando para a Meta...`, 'info');
+                
+                // CÓDIGO CORRIGIDO PARA CRIAR CAMPANHA NA API NOVA
+                const params = {
+                    name: campName, 
+                    objective: 'OUTCOME_SALES', 
+                    status: 'PAUSED', 
+                    special_ad_categories: "['NONE']", 
+                    buying_type: 'AUCTION'
+                };
+                
+                await apiCall(`/${currentAccountId}/campaigns`, params, 'POST');
+                showToast('Campanha Criada com Sucesso!', 'success');
+                
+                setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
+            } catch (err) { 
+                showToast('Erro ao criar.', 'error');
+                handleVisualError(err.message); 
+            }
+        }
+
         async function actionToggleStatus(id, checkbox) {
             const newStatus = checkbox.checked ? 'ACTIVE' : 'PAUSED';
             try {
                 showToast(`Salvando...`, 'info');
                 await apiCall(`/${id}`, { status: newStatus }, 'POST');
                 showToast(`Status atualizado!`, 'success');
-            } catch (err) { checkbox.checked = !checkbox.checked; showToast(err.message, 'error'); }
+            } catch (err) { checkbox.checked = !checkbox.checked; showToast('Erro', 'error'); handleVisualError(err.message); }
         }
 
         async function actionRename(id, currentName) {
@@ -429,7 +452,7 @@
                     await apiCall(`/${id}`, { name: newName }, 'POST');
                     document.getElementById(`name-${id}`).textContent = newName;
                     showToast('Nome atualizado!', 'success');
-                } catch (err) { showToast(err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
@@ -439,7 +462,7 @@
                 try {
                     await apiCall(`/${id}`, { daily_budget: parseFloat(newVal) * 100 }, 'POST');
                     showToast('Orçamento alterado! Recarregue a página.', 'success');
-                } catch (err) { showToast(err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
@@ -449,7 +472,7 @@
                     await apiCall(`/${id}/copies`, { status: 'PAUSED' }, 'POST');
                     showToast('Cópia gerada!', 'success');
                     setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-                } catch (err) { showToast(err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
@@ -459,7 +482,7 @@
                     await apiCall(`/${id}`, { status: 'ARCHIVED' }, 'POST');
                     document.getElementById(`row-${id}`).style.display = 'none';
                     showToast('Arquivada.', 'success');
-                } catch (err) { showToast(err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
@@ -469,22 +492,8 @@
                     await apiCall(`/${id}`, {}, 'DELETE');
                     document.getElementById(`row-${id}`).style.display = 'none';
                     showToast('Campanha DELETADA com sucesso!', 'success');
-                } catch (err) { showToast(err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
-        }
-
-        async function createCampaign() {
-            if(!currentAccountId) return;
-            const campName = prompt("Nome da nova campanha:");
-            if(!campName) return;
-
-            try {
-                await apiCall(`/${currentAccountId}/campaigns`, {
-                    name: campName, objective: 'OUTCOME_SALES', status: 'PAUSED', special_ad_categories: '[]'
-                }, 'POST');
-                showToast('Criada!', 'success');
-                setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-            } catch (err) { showToast(err.message, 'error'); }
         }
 
         // ==========================================
@@ -518,7 +527,6 @@
                         document.getElementById(`row-${id}`).style.display = 'none';
                     } else {
                         await apiCall(`/${id}`, { status: action }, 'POST');
-                        // Tenta atualizar o toggle visual
                         const toggle = document.querySelector(`#row-${id} .toggle-switch input`);
                         if(toggle) toggle.checked = (action === 'ACTIVE');
                     }
@@ -530,7 +538,6 @@
             
             showToast(`${successCount} de ${ids.length} processados!`, 'success');
             
-            // Limpa seleção
             document.querySelectorAll('.camp-checkbox').forEach(cb => cb.checked = false);
             document.getElementById('select-all').checked = false;
             updateBulkActionBar();
