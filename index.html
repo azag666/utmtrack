@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HotTrack PRO - Gerenciamento Master</title>
+    <title>HotTrack PRO - Ultimate Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -35,6 +35,9 @@
         input:checked + .slider:before { transform: translateX(16px); }
         .action-icon { cursor: pointer; opacity: 0.7; transition: 0.2s; font-size: 1rem; }
         .action-icon:hover { opacity: 1; transform: scale(1.1); }
+        
+        /* Checkbox Customizado */
+        .row-checkbox { width: 16px; height: 16px; accent-color: var(--accent-primary); cursor: pointer; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -43,14 +46,14 @@
         <div class="p-6 border-b border-border-color">
             <h1 class="text-xl font-bold text-white flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                HotTrack <span class="text-xs font-normal bg-accent-primary/20 text-accent-primary px-2 py-1 rounded-full ml-1">PRO</span>
+                HotTrack <span class="text-xs font-normal bg-accent-primary/20 text-accent-primary px-2 py-1 rounded-full ml-1">MAX</span>
             </h1>
         </div>
         
         <div class="p-4 flex-1 overflow-y-auto">
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis / BMs</label>
+                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis de Contingência</label>
                     <button id="btn-add-profile" class="text-xs text-accent-primary hover:text-white">+ Adicionar</button>
                 </div>
                 <select id="profile-selector" class="form-select text-sm bg-card mb-2">
@@ -65,13 +68,13 @@
                     <option value="yesterday">Ontem</option>
                     <option value="last_7d" selected>Últimos 7 dias</option>
                     <option value="last_30d">Últimos 30 dias</option>
+                    <option value="maximum">Máximo</option>
                 </select>
             </div>
             
             <div class="mt-8 border-t border-border-color pt-6">
-                <p class="text-xs text-text-secondary mb-2 uppercase tracking-wider">Ações em Massa</p>
-                <button onclick="alert('Função de Servidor: A troca de criativos em massa exige upload via backend para evitar bloqueios de CORS.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🔄 Trocar Criativos (Escala)</button>
-                <button onclick="alert('Função de Servidor: O cruzamento com o Telegram exige Banco de Dados.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🤖 Vincular Bot Telegram</button>
+                <p class="text-xs text-text-secondary mb-2 uppercase tracking-wider">Automações Extras</p>
+                <button onclick="alert('Funcionalidade indisponível: Exige um servidor Back-end para processar imagens e contornar bloqueios de CORS.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🔄 Subir Criativos em Massa</button>
             </div>
         </div>
     </aside>
@@ -79,24 +82,43 @@
     <main class="flex-1 overflow-y-auto p-8 relative">
         <div id="welcome-state" class="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center">
             <h2 class="text-2xl font-bold text-white mb-2">Central de Operações</h2>
-            <p class="text-text-secondary mb-6">Conecte um perfil oficial para visualizar todas as BMs e gerenciar campanhas centralizadas.</p>
+            <p class="text-text-secondary mb-6">Conecte um perfil da Meta para visualizar todas as Contas e gerenciar Campanhas.</p>
             <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Perfil Meta</button>
         </div>
 
         <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-lg mb-6 flex-col items-center text-center shadow-xl">
             <svg class="w-12 h-12 mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <strong class="font-bold block text-xl mb-2 text-white">O Facebook recusou a conexão!</strong>
+            <strong class="font-bold block text-xl mb-2 text-white">Erro na Graph API</strong>
             <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words" id="error-text">Mensagem do erro aqui</p>
-            <p class="text-xs text-text-secondary mt-4">Analise o erro acima. Pode ser falta de permissão ou conta bloqueada.</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
             <div id="accounts-section">
-                <h3 class="text-lg font-bold text-white mb-4">Gerenciadores de Anúncio (Contas)</h3>
+                <h3 class="text-lg font-bold text-white mb-4">Gerenciadores de Anúncio</h3>
                 <div id="accounts-table-container"></div>
             </div>
 
             <div id="campaigns-section" class="hidden border-t border-border-color pt-6">
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-card border border-border-color p-4 rounded-lg">
+                        <p class="text-xs text-text-secondary uppercase">Gasto Total (Período)</p>
+                        <p class="text-xl font-bold text-white mt-1" id="summary-spend">R$ 0,00</p>
+                    </div>
+                    <div class="bg-card border border-border-color p-4 rounded-lg">
+                        <p class="text-xs text-text-secondary uppercase">Vendas Meta</p>
+                        <p class="text-xl font-bold text-white mt-1" id="summary-purchases">0</p>
+                    </div>
+                    <div class="bg-card border border-border-color p-4 rounded-lg">
+                        <p class="text-xs text-text-secondary uppercase">CPA Médio</p>
+                        <p class="text-xl font-bold text-white mt-1" id="summary-cpa">R$ 0,00</p>
+                    </div>
+                    <div class="bg-card border border-border-color p-4 rounded-lg">
+                        <p class="text-xs text-text-secondary uppercase">ROAS Global</p>
+                        <p class="text-xl font-bold mt-1" id="summary-roas">0.00x</p>
+                    </div>
+                </div>
+
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <div>
                         <h3 id="active-account-name" class="text-2xl font-bold text-white"></h3>
@@ -108,11 +130,21 @@
                         </button>
                     </div>
                 </div>
+
+                <div id="bulk-action-bar" class="hidden bg-blue-900/20 border border-blue-500/30 p-3 rounded-lg flex items-center justify-between mb-4">
+                    <span class="text-sm font-medium text-blue-300"><span id="bulk-count">0</span> itens selecionados</span>
+                    <div class="space-x-2">
+                        <button onclick="performBulkAction('ACTIVE')" class="bg-success hover:bg-green-500 text-white px-3 py-1.5 rounded text-xs font-bold transition">Ativar</button>
+                        <button onclick="performBulkAction('PAUSED')" class="bg-warning hover:bg-yellow-400 text-black px-3 py-1.5 rounded text-xs font-bold transition">Pausar</button>
+                        <button onclick="performBulkAction('DELETE')" class="bg-danger hover:bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold transition">Excluir</button>
+                    </div>
+                </div>
                 
                 <div class="table-custom-wrapper overflow-x-auto">
                     <table class="table-custom">
                         <thead>
                             <tr>
+                                <th class="w-10 text-center"><input type="checkbox" id="select-all" class="row-checkbox"></th>
                                 <th>Status</th>
                                 <th>Nome da Campanha</th>
                                 <th class="text-right">Orçamento</th>
@@ -143,7 +175,7 @@
                 </a>
                 <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN EAAG</span><div class="flex-grow border-t border-border-color"></div></div>
                 <div class="space-y-3">
-                    <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Principal)">
+                    <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Secundário)">
                     <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso Mestre (EAAG...)">
                     <button id="save-profile-btn" class="bg-white/10 hover:bg-white/20 text-white w-full py-2 rounded-lg text-sm transition">Salvar Token Localmente</button>
                 </div>
@@ -203,6 +235,13 @@
             });
 
             document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
+
+            // Listener Select All
+            document.getElementById('select-all').addEventListener('change', (e) => {
+                const checkboxes = document.querySelectorAll('.camp-checkbox');
+                checkboxes.forEach(cb => cb.checked = e.target.checked);
+                updateBulkActionBar();
+            });
         });
 
         function addProfile(name, token) {
@@ -221,7 +260,7 @@
         }
 
         // ==========================================
-        // MOTOR DA GRAPH API SUPER APERFEIÇOADO (CATCHER DE ERROS)
+        // MOTOR DA GRAPH API
         // ==========================================
         async function apiCall(endpoint, params = {}, method = 'GET') {
             const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
@@ -240,24 +279,19 @@
                 const data = await res.json();
                 
                 if (!res.ok || data.error) {
-                    // O SEGREDO: Captura EXATA do erro do Facebook
-                    const errMsg = data.error 
-                        ? `Tipo: ${data.error.type}\nMensagem: ${data.error.message}\nCódigo: ${data.error.code}` 
-                        : `Erro HTTP Fatal: ${res.status} - ${res.statusText}`;
+                    const errMsg = data.error ? `Erro Graph API:\nCódigo: ${data.error.code}\nMensagem: ${data.error.message}` : `Erro HTTP ${res.status}`;
                     throw new Error(errMsg);
                 }
                 return data;
             } catch (err) {
                 console.error("API Fetch Error:", err);
-                throw err; // Repassa para a função de carregamento
+                throw err;
             }
         }
 
         function handleVisualError(errorMessage) {
             UI.welcome.classList.add('hidden');
             UI.dash.classList.add('hidden');
-            
-            // Quebra as linhas do erro para ficar legível
             UI.errorText.innerHTML = errorMessage.replace(/\n/g, '<br>');
             UI.errorAlert.classList.remove('hidden');
             UI.errorAlert.classList.add('flex');
@@ -290,9 +324,7 @@
                             `).join('') || '<tr><td colspan="4" class="text-center">Nenhuma conta encontrada.</td></tr>'}</tbody>
                         </table>
                     </div>`;
-            } catch (err) {
-                handleVisualError(err.message);
-            }
+            } catch (err) { handleVisualError(err.message); }
         }
 
         async function loadCampaigns(accountId, accountName) {
@@ -303,7 +335,11 @@
             document.getElementById('active-account-id').textContent = accountId;
             
             const tbody = document.getElementById('campaigns-tbody');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-text-secondary animate-pulse">Baixando métricas (ads_read)...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-text-secondary animate-pulse">Baixando métricas avançadas...</td></tr>';
+            
+            // Esconde barra em lote ao recarregar
+            document.getElementById('bulk-action-bar').classList.add('hidden');
+            document.getElementById('select-all').checked = false;
 
             try {
                 const preset = document.getElementById('datePreset').value;
@@ -312,10 +348,11 @@
                     limit: 100
                 };
                 
-                // Se esse endpoint der erro, o catch abaixo joga na tela gigante!
                 const res = await apiCall(`/${accountId}/campaigns`, params);
                 const campaigns = res.data || [];
                 const activeCamps = campaigns.filter(c => c.status !== 'DELETED');
+
+                let totalSpend = 0; let totalPurchases = 0; let totalRev = 0;
 
                 tbody.innerHTML = activeCamps.map(camp => {
                     const ins = camp.insights?.data[0] || {};
@@ -325,12 +362,15 @@
                     const valArr = ins.action_values?.find(a => a.action_type === 'purchase');
                     const rev = valArr ? parseFloat(valArr.value) : 0;
                     
+                    totalSpend += spend; totalPurchases += purch; totalRev += rev;
+
                     const cpa = purch > 0 ? spend/purch : 0;
                     const roas = spend > 0 ? rev/spend : 0;
                     const budget = camp.daily_budget ? (parseFloat(camp.daily_budget)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'CBO/ABO Ext.';
 
                     return `
                         <tr id="row-${camp.id}">
+                            <td class="text-center"><input type="checkbox" class="row-checkbox camp-checkbox" value="${camp.id}" onchange="updateBulkActionBar()"></td>
                             <td>
                                 <label class="toggle-switch">
                                     <input type="checkbox" onchange="actionToggleStatus('${camp.id}', this)" ${camp.status==='ACTIVE'?'checked':''}>
@@ -353,34 +393,33 @@
                             <td class="text-right font-bold ${roas >= 1 ? 'text-success' : (roas>0?'text-danger':'text-text-secondary')}">${roas.toFixed(2)}x</td>
                             <td class="text-center space-x-3">
                                 <span class="action-icon text-warning" onclick="actionDuplicate('${camp.id}')" title="Duplicar Rápido">📑</span>
-                                <span class="action-icon text-danger" onclick="actionArchive('${camp.id}')" title="Arquivar">🗄️</span>
+                                <span class="action-icon text-danger" onclick="actionDelete('${camp.id}')" title="Excluir Permanentemente">🗑️</span>
                             </td>
                         </tr>
                     `;
-                }).join('') || '<tr><td colspan="8" class="text-center text-text-secondary py-6">Nenhuma campanha rodando.</td></tr>';
+                }).join('') || '<tr><td colspan="9" class="text-center text-text-secondary py-6">Nenhuma campanha rodando.</td></tr>';
 
-            } catch (err) {
-                // EXIBE O ERRO DA API DIRETO NA TABELA
-                tbody.innerHTML = `<tr><td colspan="8" class="p-0"><div class="bg-red-900/40 p-6 text-center text-red-400 font-mono text-xs whitespace-pre-wrap">${err.message}</div></td></tr>`;
-                
-                // E também chama o erro gigante para garantir
-                handleVisualError("Erro ao carregar Campanhas:\n" + err.message);
-            }
+                // Atualiza Resumo
+                document.getElementById('summary-spend').textContent = totalSpend.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                document.getElementById('summary-purchases').textContent = totalPurchases;
+                document.getElementById('summary-cpa').textContent = (totalPurchases > 0 ? totalSpend/totalPurchases : 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                const gRoas = totalSpend > 0 ? totalRev/totalSpend : 0;
+                document.getElementById('summary-roas').textContent = gRoas.toFixed(2) + 'x';
+                document.getElementById('summary-roas').className = `text-xl font-bold mt-1 ${gRoas >= 1 ? 'text-success' : (gRoas > 0 ? 'text-danger' : 'text-white')}`;
+
+            } catch (err) { handleVisualError(err.message); }
         }
 
         // ==========================================
-        // FUNÇÕES DE AÇÃO DA API
+        // FUNÇÕES DE AÇÃO DA API (INDIVIDUAIS)
         // ==========================================
         async function actionToggleStatus(id, checkbox) {
             const newStatus = checkbox.checked ? 'ACTIVE' : 'PAUSED';
             try {
                 showToast(`Salvando...`, 'info');
                 await apiCall(`/${id}`, { status: newStatus }, 'POST');
-                showToast(`Sucesso!`, 'success');
-            } catch (err) {
-                checkbox.checked = !checkbox.checked;
-                handleVisualError(err.message);
-            }
+                showToast(`Status atualizado!`, 'success');
+            } catch (err) { checkbox.checked = !checkbox.checked; showToast(err.message, 'error'); }
         }
 
         async function actionRename(id, currentName) {
@@ -390,7 +429,7 @@
                     await apiCall(`/${id}`, { name: newName }, 'POST');
                     document.getElementById(`name-${id}`).textContent = newName;
                     showToast('Nome atualizado!', 'success');
-                } catch (err) { handleVisualError(err.message); }
+                } catch (err) { showToast(err.message, 'error'); }
             }
         }
 
@@ -399,8 +438,18 @@
             if(newVal && !isNaN(newVal)) {
                 try {
                     await apiCall(`/${id}`, { daily_budget: parseFloat(newVal) * 100 }, 'POST');
-                    showToast('Orçamento alterado! Dê F5.', 'success');
-                } catch (err) { handleVisualError(err.message); }
+                    showToast('Orçamento alterado! Recarregue a página.', 'success');
+                } catch (err) { showToast(err.message, 'error'); }
+            }
+        }
+
+        async function actionDuplicate(id) {
+            if(confirm("Criar uma cópia pausada na BM?")) {
+                try {
+                    await apiCall(`/${id}/copies`, { status: 'PAUSED' }, 'POST');
+                    showToast('Cópia gerada!', 'success');
+                    setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
+                } catch (err) { showToast(err.message, 'error'); }
             }
         }
 
@@ -409,18 +458,18 @@
                 try {
                     await apiCall(`/${id}`, { status: 'ARCHIVED' }, 'POST');
                     document.getElementById(`row-${id}`).style.display = 'none';
-                    showToast('Campanha arquivada.', 'success');
-                } catch (err) { handleVisualError(err.message); }
+                    showToast('Arquivada.', 'success');
+                } catch (err) { showToast(err.message, 'error'); }
             }
         }
 
-        async function actionDuplicate(id) {
-            if(confirm("Criar uma cópia na BM?")) {
+        async function actionDelete(id) {
+            if(confirm("ATENÇÃO: Deseja DELETAR PERMANENTEMENTE esta campanha?")) {
                 try {
-                    await apiCall(`/${id}/copies`, { status: 'PAUSED' }, 'POST');
-                    showToast('Cópia gerada!', 'success');
-                    setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 2000);
-                } catch (err) { handleVisualError(err.message); }
+                    await apiCall(`/${id}`, {}, 'DELETE');
+                    document.getElementById(`row-${id}`).style.display = 'none';
+                    showToast('Campanha DELETADA com sucesso!', 'success');
+                } catch (err) { showToast(err.message, 'error'); }
             }
         }
 
@@ -435,9 +484,56 @@
                 }, 'POST');
                 showToast('Criada!', 'success');
                 setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-            } catch (err) {
-                handleVisualError(err.message);
+            } catch (err) { showToast(err.message, 'error'); }
+        }
+
+        // ==========================================
+        // AÇÕES EM MASSA (BULK)
+        // ==========================================
+        function updateBulkActionBar() {
+            const checked = document.querySelectorAll('.camp-checkbox:checked');
+            const bar = document.getElementById('bulk-action-bar');
+            if (checked.length > 0) {
+                document.getElementById('bulk-count').textContent = checked.length;
+                bar.classList.remove('hidden');
+            } else {
+                bar.classList.add('hidden');
             }
+        }
+
+        async function performBulkAction(action) {
+            const checkboxes = document.querySelectorAll('.camp-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            if(ids.length === 0) return;
+
+            if(!confirm(`Deseja aplicar esta ação a ${ids.length} campanhas?`)) return;
+
+            showToast(`Processando ${ids.length} itens...`, 'info');
+
+            let successCount = 0;
+            for(let id of ids) {
+                try {
+                    if (action === 'DELETE') {
+                        await apiCall(`/${id}`, {}, 'DELETE');
+                        document.getElementById(`row-${id}`).style.display = 'none';
+                    } else {
+                        await apiCall(`/${id}`, { status: action }, 'POST');
+                        // Tenta atualizar o toggle visual
+                        const toggle = document.querySelector(`#row-${id} .toggle-switch input`);
+                        if(toggle) toggle.checked = (action === 'ACTIVE');
+                    }
+                    successCount++;
+                } catch(err) {
+                    console.error("Falha ao processar ID:", id, err);
+                }
+            }
+            
+            showToast(`${successCount} de ${ids.length} processados!`, 'success');
+            
+            // Limpa seleção
+            document.querySelectorAll('.camp-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            updateBulkActionBar();
         }
 
         function showToast(msg, type='info') {
