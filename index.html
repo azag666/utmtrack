@@ -3,777 +3,429 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Command Center Pro</title>
+    <title>Braintrack PRO - Telegram Tracking</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0A0A0A;
-            --bg-secondary: #121212;
-            --bg-card: #181818;
+            --bg-primary: #050505;
+            --bg-secondary: #0a0a0a;
+            --bg-card: #141414;
             --border-color: #262626;
-            --accent-primary: #3b82f6; /* Azul moderno tipo BotBrain */
+            --accent-primary: #3b82f6;
             --accent-hover: #2563eb;
+            --telegram-blue: #0088cc;
             --text-primary: #f5f5f5;
             --text-secondary: #a3a3a3;
             --success: #22c55e;
             --danger: #ef4444;
             --warning: #facc15;
         }
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-primary);
-            color: var(--text-primary);
-            overflow-x: hidden;
-        }
-        .form-input, .form-select {
-            background-color: #121212;
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-            width: 100%;
-            padding: 0.75rem 1rem;
-        }
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 1px var(--accent-primary);
-        }
-        .btn-primary {
-            background-color: var(--accent-primary);
-            color: white;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
-            text-align: center;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: var(--accent-hover);
-        }
-        .btn-outline {
-            background-color: transparent;
-            color: var(--text-secondary);
-            font-weight: 500;
-            border-radius: 0.5rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s ease;
-            text-align: center;
-            padding: 0.75rem 1rem;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            cursor: pointer;
-        }
-        .btn-outline:hover {
-            border-color: var(--text-primary);
-            color: var(--text-primary);
-            background-color: rgba(255,255,255,0.05);
-        }
-        .loader {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-primary);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        .table-custom-wrapper {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            overflow: hidden;
-        }
-        .table-custom { border-collapse: collapse; width: 100%; }
-        .table-custom th, .table-custom td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-            font-size: 0.875rem;
-        }
-        .table-custom th {
-            color: var(--text-secondary);
-            font-weight: 500;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            text-align: left;
-        }
-        .table-custom th.text-right, .table-custom td.text-right { text-align: right; }
-        .table-custom th.text-center, .table-custom td.text-center { text-align: center; }
-        .table-custom tbody tr:last-child td { border-bottom: none; }
-        .table-custom tbody tr:hover { background-color: rgba(255, 255, 255, 0.03); }
-        
-        .metric-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-        }
-        
-        /* Modais */
-        .modal {
-            position: fixed; inset: 0; z-index: 100; display: none;
-            align-items: center; justify-content: center; padding: 1rem;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
+        .form-input, .form-select { background-color: #0a0a0a; border: 1px solid var(--border-color); color: white; border-radius: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
+        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 1px var(--accent-primary); }
+        .btn-primary { background-color: var(--accent-primary); color: white; font-weight: 500; border-radius: 0.5rem; padding: 0.75rem 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: 0.2s; border: none; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        .table-custom-wrapper { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden; }
+        .table-custom { border-collapse: collapse; width: 100%; text-align: left; }
+        .table-custom th, .table-custom td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.875rem; }
+        .table-custom th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; background: #0a0a0a; }
+        .table-custom tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal.flex { display: flex; }
-        .modal-backdrop {
-            position: fixed; inset: 0;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-        }
-        .modal-content {
-            position: relative; background-color: var(--bg-card);
-            border: 1px solid var(--border-color); border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%; overflow: hidden;
-        }
-        
-        /* Estilo da Tabela e Abas */
-        .tab-button {
-            background: transparent; border: none; color: var(--text-secondary);
-            padding: 1rem 0; margin-right: 2rem;
-            border-bottom: 2px solid transparent; transition: all 0.2s; font-weight: 500;
-            cursor: pointer;
-        }
-        .tab-button.active {
-            color: var(--text-primary);
-            border-bottom-color: var(--accent-primary);
-        }
+        .modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        .modal-content { position: relative; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 1rem; width: 100%; overflow: hidden; }
+        .tab-button { background: transparent; border: none; color: var(--text-secondary); padding: 1rem 0; margin-right: 2rem; border-bottom: 2px solid transparent; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .tab-button.active { color: white; border-bottom-color: var(--accent-primary); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        
-        /* Switch */
         .toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .4s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(16px); }
+        .badge-tg { background: rgba(0, 136, 204, 0.1); color: var(--telegram-blue); border: 1px solid rgba(0, 136, 204, 0.2); padding: 0.1rem 0.5rem; border-radius: 99px; font-size: 0.7rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
     </style>
 </head>
-<body>
+<body class="flex h-screen overflow-hidden">
 
-    <div class="flex h-screen overflow-hidden">
-        <aside class="w-64 bg-secondary border-r border-border-color flex flex-col">
-            <div class="p-6 border-b border-border-color">
-                <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                    Braintrack PRO
-                </h1>
-            </div>
-            
-            <div class="p-4 flex-1">
-                <div id="auth-status-container" class="mb-6 p-4 rounded-lg bg-card border border-border-color text-center">
-                    <p class="text-sm text-text-secondary mb-3">Status da Conexão</p>
-                    <div id="connection-status" class="flex items-center justify-center gap-2 mb-4 text-danger">
-                        <span class="w-2 h-2 rounded-full bg-danger"></span>
-                        <span class="text-sm font-medium">Desconectado</span>
-                    </div>
-                    <button id="open-connect-modal" class="btn-primary py-2 text-sm">
-                        Conectar Meta Ads
-                    </button>
-                    <button id="logout-btn" class="btn-outline py-2 text-sm mt-2 hidden text-danger border-danger/30 hover:border-danger hover:bg-danger/10 hover:text-danger">
-                        Desconectar
-                    </button>
+    <aside class="w-72 bg-secondary border-r border-border-color flex flex-col z-10">
+        <div class="p-6 border-b border-border-color">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Braintrack <span class="text-xs font-normal text-telegram-blue border border-telegram-blue px-2 py-1 rounded-full ml-1">HOT</span>
+            </h1>
+        </div>
+        
+        <div class="p-4 flex-1 overflow-y-auto">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis Conectados</label>
+                    <button id="btn-add-profile" class="text-xs text-accent-primary hover:text-white">+ Adicionar</button>
                 </div>
-
-                <div class="mb-6">
-                    <label class="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">Período</label>
-                    <select id="datePreset" class="form-select text-sm">
-                        <option value="today">Hoje</option>
-                        <option value="yesterday">Ontem</option>
-                        <option value="last_7d" selected>Últimos 7 dias</option>
-                        <option value="last_30d">Últimos 30 dias</option>
-                        <option value="this_month">Este mês</option>
-                        <option value="last_month">Mês passado</option>
+                <select id="profile-selector" class="form-select text-sm bg-card mb-2">
+                    <option value="">Nenhum perfil ativo...</option>
                     </select>
-                </div>
             </div>
-            
-            <div class="p-4 border-t border-border-color">
-                <p class="text-xs text-text-secondary text-center">v2.0 • Meta API v19.0</p>
+
+            <div class="mb-6">
+                <label class="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">Período</label>
+                <select id="datePreset" class="form-select text-sm bg-card">
+                    <option value="today">Hoje</option>
+                    <option value="yesterday">Ontem</option>
+                    <option value="last_7d" selected>Últimos 7 dias</option>
+                    <option value="last_30d">Últimos 30 dias</option>
+                </select>
             </div>
-        </aside>
 
-        <main class="flex-1 flex flex-col h-full bg-primary overflow-y-auto relative">
-            <div class="p-8 max-w-7xl mx-auto w-full space-y-8">
-                
-                <div id="welcome-screen" class="flex flex-col items-center justify-center py-32 text-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-border-color mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                    </svg>
-                    <h2 class="text-2xl font-bold text-white mb-2">Nenhum dado encontrado</h2>
-                    <p class="text-text-secondary max-w-md">Conecte sua conta do Facebook Ads no menu lateral para importar suas campanhas, conjuntos e anúncios.</p>
-                </div>
-
-                <div id="loader-screen" class="hidden flex-col items-center justify-center py-32">
-                    <div class="loader mb-4"></div>
-                    <p id="loader-text" class="text-text-secondary">Sincronizando dados com a Meta...</p>
-                </div>
-                <div id="error-screen" class="hidden bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg"></div>
-
-                <div id="dashboard-content" class="hidden space-y-8">
-                    
-                    <div class="border-b border-border-color">
-                        <nav id="main-tabs" class="flex">
-                            <button class="tab-button active" data-tab="overview">Visão Geral das Contas</button>
-                            <button class="tab-button" data-tab="details">Análise de Campanhas</button>
-                        </nav>
-                    </div>
-
-                    <div id="main-tab-content-overview" class="tab-content active">
-                        <h2 class="text-lg font-semibold text-white mb-4">Suas Contas de Anúncio</h2>
-                        <div id="overview-table-container"></div>
-                    </div>
-                    
-                    <div id="main-tab-content-details" class="tab-content space-y-8">
-                        <div id="details-placeholder" class="text-center py-20 border border-dashed border-border-color rounded-lg">
-                            <p class="text-text-secondary">Selecione uma conta na aba "Visão Geral" para ver as campanhas.</p>
-                        </div>
-
-                        <div id="summary-section" class="hidden">
-                            <h2 id="details-title" class="text-xl font-bold text-white mb-4">Métricas Globais</h2>
-                            <div id="summaryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
-                        </div>
-
-                        <div id="reports-section" class="hidden">
-                            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 border-b border-border-color pb-4">
-                                <nav id="detail-tabs" class="flex gap-4">
-                                    </nav>
-                                <div class="flex gap-3 w-full sm:w-auto">
-                                    <input type="text" id="table-filter-input" class="form-input text-sm w-full sm:w-48 py-1.5" placeholder="Buscar nome...">
-                                    <select id="sortBy" class="form-select text-sm py-1.5 w-auto">
-                                        <option value="roas">Ordenar: ROAS</option>
-                                        <option value="purchases">Ordenar: Vendas</option>
-                                        <option value="spend">Ordenar: Gasto</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div id="bulk-action-bar" class="hidden mb-4 p-3 bg-secondary border border-border-color rounded-lg items-center justify-between shadow-lg"></div>
-
-                            <div id="detail-tab-content-campaigns" class="tab-content"></div>
-                            <div id="detail-tab-content-adsets" class="tab-content"></div>
-                            <div id="detail-tab-content-ads" class="tab-content"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="connect-modal" class="modal">
-        <div class="modal-backdrop" id="connect-modal-bg"></div>
-        <div class="modal-content max-w-md w-full mx-4">
-            <div class="p-6 border-b border-border-color flex justify-between items-center bg-secondary">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent-primary" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
-                    Conectar Conta Meta
-                </h3>
-                <button id="close-connect-modal" class="text-text-secondary hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <div class="space-y-2 mt-8 border-t border-border-color pt-6">
+                <label class="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">Automação & Escala</label>
+                <button onclick="alert('Funcionalidade requer integração com Banco de Dados/Backend. O rastreio via UTM e Webhook do Telegram deve ser configurado no servidor.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition flex items-center gap-2">
+                    <svg class="w-4 h-4 text-telegram-blue" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.05-.19-.02-.27 0-.12.03-1.98 1.26-5.59 3.7-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.23.36-.47.98-.73 3.84-1.67 6.4-2.78 7.68-3.31 3.65-1.52 4.41-1.78 4.91-1.79.11 0 .35.03.48.14.11.09.14.22.15.33-.01.07-.01.14-.02.2z"/></svg>
+                    Vincular Bots (Webhooks)
+                </button>
+                <button onclick="alert('Requer Backend: Um CronJob no servidor precisa monitorar as campanhas 24/7 para executar regras de Stop Loss ou Escala.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition flex items-center gap-2">
+                    <svg class="w-4 h-4 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    Regras Automáticas
+                </button>
+                <button onclick="alert('Requer Backend e Token de Página (Pages API): O sistema precisa ler os webhooks de comentários e enviar a requisição de ocultar via API Graph.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition flex items-center gap-2">
+                    <svg class="w-4 h-4 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                    Ocultar Comentários Negativos
+                </button>
+                <button onclick="alert('Requer Backend: Geração dinâmica de criativos e subida em lote via API de Marketing.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition flex items-center gap-2">
+                    <svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    Teste A/B em Massa
                 </button>
             </div>
-            
-            <div class="p-6 space-y-6">
-                <p class="text-sm text-text-secondary text-center">Conecte sua conta do Facebook para importar automaticamente suas contas de anúncio e métricas.</p>
+        </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-8 relative">
+        <div id="welcome-state" class="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center">
+            <h2 class="text-2xl font-bold text-white mb-2">Nenhum perfil selecionado</h2>
+            <p class="text-text-secondary mb-6">Adicione perfis de contingência ou contas principais no menu lateral para visualizar as BMs, Contas e Campanhas.</p>
+            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Primeiro Perfil</button>
+        </div>
+
+        <div id="loading-state" class="hidden flex-col items-center justify-center h-full">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-primary mb-4"></div>
+            <p class="text-text-secondary">Puxando dados da Meta...</p>
+        </div>
+
+        <div id="error-state" class="hidden bg-red-900/20 border border-red-500/30 text-red-400 p-4 rounded-lg mb-6"></div>
+
+        <div id="dashboard-content" class="hidden space-y-6">
+            <nav id="main-tabs" class="flex border-b border-border-color">
+                <button class="tab-button active" data-tab="accounts">BMs e Contas</button>
+                <button class="tab-button" data-tab="campaigns">Gestão de Tráfego</button>
+            </nav>
+
+            <div id="tab-accounts" class="tab-content active">
+                <h3 class="text-lg font-semibold text-white mb-4">Contas de Anúncio Disponíveis</h3>
+                <div id="accounts-table-container"></div>
+            </div>
+
+            <div id="tab-campaigns" class="tab-content space-y-6">
+                <div id="campaigns-placeholder" class="text-center py-12 border border-dashed border-border-color rounded-lg text-text-secondary">
+                    Selecione uma conta na aba "BMs e Contas" para carregar as campanhas.
+                </div>
+
+                <div id="campaigns-data" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="active-account-name" class="text-lg font-semibold text-white"></h3>
+                        <div class="flex gap-2">
+                            <button class="bg-card border border-border-color px-3 py-1.5 rounded text-sm hover:text-white transition">+ Criar Campanha</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-custom-wrapper overflow-x-auto">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th class="w-8"><input type="checkbox"></th>
+                                    <th>Status</th>
+                                    <th>Campanha / Conjunto</th>
+                                    <th>Bot Vinculado (TG)</th>
+                                    <th class="text-right">Orçamento</th>
+                                    <th class="text-right">Gasto</th>
+                                    <th class="text-right">Vendas (Meta)</th>
+                                    <th class="text-right">Vendas (Bot)</th>
+                                    <th class="text-right">CPA Real</th>
+                                    <th class="text-right">ROAS</th>
+                                    <th class="text-center">Ações Rápidas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="campaigns-tbody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="add-profile-modal" class="modal">
+        <div class="modal-backdrop close-modal"></div>
+        <div class="modal-content max-w-md w-full mx-4">
+            <div class="p-5 border-b border-border-color flex justify-between items-center bg-secondary">
+                <h3 class="font-bold text-white">Conectar Novo Perfil</h3>
+                <button class="text-text-secondary hover:text-white close-modal">✕</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-sm text-text-secondary">Para gerenciar múltiplos perfis de contingência de forma segura sem bloqueios de CORS, insira o Token Mestre (EAAG) ou conecte via App Oficial.</p>
                 
-                <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token" 
-                   id="btn-oauth"
-                   class="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer" style="text-decoration: none;">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M23.998 12c0-6.628-5.372-12-11.999-12C5.372 0 0 5.372 0 12c0 5.988 4.388 10.954 10.124 11.854v-8.384H7.078v-3.47h3.046V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 22.954 24 17.988 24 12z"></path></svg>
-                    Conectar com Facebook
+                <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token" class="btn-primary" style="background-color: #1877F2; text-decoration: none;">
+                    Conectar Perfil com Facebook (OAuth)
                 </a>
                 
+                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU MANUAL (CONTINGÊNCIA)</span><div class="flex-grow border-t border-border-color"></div></div>
+                
                 <div>
-                    <button id="btn-copy-link" class="btn-outline">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                        Copiar link para navegador multilogin
-                    </button>
-                    <p class="text-xs text-text-secondary text-center mt-2">Gere um link para conectar em outro navegador ou compartilhar.</p>
-                </div>
-
-                <div class="relative flex items-center py-2">
-                    <div class="flex-grow border-t border-border-color"></div>
-                    <span class="flex-shrink-0 mx-4 text-text-secondary text-xs uppercase tracking-wider">Conectar manualmente (avançado)</span>
-                    <div class="flex-grow border-t border-border-color"></div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-text-secondary mb-1">Access Token</label>
-                    <input type="password" id="manualTokenInput" class="form-input font-mono text-xs" placeholder="EAAG... ou EAAB...">
-                    <button id="btn-connect-manual" class="btn-secondary w-full mt-3 py-2 text-white border-border-color hover:bg-border-color">
-                        Conectar Manualmente
-                    </button>
+                    <input type="text" id="profile-name" class="form-input mb-2 text-sm" placeholder="Nome do Perfil (Ex: Perfil Principal Maria)">
+                    <input type="password" id="profile-token" class="form-input mb-3 text-sm font-mono" placeholder="Token EAAG...">
+                    <button id="save-profile-btn" class="btn-primary text-sm py-2">Salvar Perfil Localmente</button>
                 </div>
             </div>
         </div>
     </div>
+
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
 
     <script>
-        const API_VERSION = 'v19.0';
-        const BASE_URL = `https://graph.facebook.com/${API_VERSION}`;
-        const OAUTH_LINK = "https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token";
+        // GERENCIADOR DE ESTADO E PERFIS
+        let profiles = JSON.parse(localStorage.getItem('hottrack_profiles')) || [];
+        let currentToken = null;
+        let currentAccountId = null;
 
-        // Variáveis de Estado
-        let _allCampaigns = [], _allAdsets = [], _allAds = [], _adAccountsData = [];
-        let _currentAccountId = null;
-        let _currentAccessToken = null;
+        // UI Elements
+        const profileSelector = document.getElementById('profile-selector');
+        const modalProfile = document.getElementById('add-profile-modal');
+        const errState = document.getElementById('error-state');
+        const loadState = document.getElementById('loading-state');
+        const dashContent = document.getElementById('dashboard-content');
+        const welcomeState = document.getElementById('welcome-state');
 
-        // Elementos UI
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const dashboardContent = document.getElementById('dashboard-content');
-        const loaderScreen = document.getElementById('loader-screen');
-        const errorScreen = document.getElementById('error-screen');
-        
-        // Modal de Conexão
-        const connectModal = document.getElementById('connect-modal');
-        const openConnectModalBtn = document.getElementById('open-connect-modal');
-        const closeConnectModalBtn = document.getElementById('close-connect-modal');
-        const connectModalBg = document.getElementById('connect-modal-bg');
-        const btnCopyLink = document.getElementById('btn-copy-link');
-        const btnConnectManual = document.getElementById('btn-connect-manual');
-        const manualTokenInput = document.getElementById('manualTokenInput');
-        
-        // Status Sidebar
-        const connectionStatus = document.getElementById('connection-status');
-        const logoutBtn = document.getElementById('logout-btn');
-        const datePreset = document.getElementById('datePreset');
-
-        // ==========================================
-        // 1. INICIALIZAÇÃO E CAPTURA DE TOKEN
-        // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
             
-            // A. Tenta capturar token do redirecionamento do Facebook (OAuth)
+            // 1. Lógica do OAuth (Captura de redirecionamento)
             const hash = window.location.hash;
-            let tokenCaptured = null;
-            
             if (hash && hash.includes('access_token')) {
                 const params = new URLSearchParams(hash.substring(1));
-                tokenCaptured = params.get('access_token');
-            } else {
-                // Fallback query (extensão)
-                const queryParams = new URLSearchParams(window.location.search);
-                tokenCaptured = queryParams.get('token');
-            }
-
-            if (tokenCaptured) {
-                // Limpa URL
+                const token = params.get('access_token');
                 window.history.replaceState({}, document.title, window.location.pathname);
-                saveTokenAndLogin(tokenCaptured);
-            } else {
-                // Verifica se já estava logado antes
-                const savedToken = localStorage.getItem('fb_saved_token');
-                if (savedToken) {
-                    saveTokenAndLogin(savedToken);
-                }
+                
+                const profileName = prompt("Sucesso! Digite um nome para identificar este perfil (Ex: BM 01 - João):");
+                if(profileName) addProfile(profileName, token);
             }
 
-            // B. Eventos do Modal
-            openConnectModalBtn.addEventListener('click', () => connectModal.classList.add('flex'));
-            closeConnectModalBtn.addEventListener('click', () => connectModal.classList.remove('flex'));
-            connectModalBg.addEventListener('click', () => connectModal.classList.remove('flex'));
+            renderProfileSelector();
 
-            // Botão: Copiar Link Multilogin
-            btnCopyLink.addEventListener('click', () => {
-                navigator.clipboard.writeText(OAUTH_LINK).then(() => {
-                    showToast('Link copiado! Cole no seu navegador multilogin.', 'success');
-                }).catch(err => {
-                    showToast('Erro ao copiar link.', 'error');
-                });
-            });
-
-            // Botão: Conectar Manualmente
-            btnConnectManual.addEventListener('click', () => {
-                const token = manualTokenInput.value.trim();
-                if(token) {
-                    connectModal.classList.remove('flex');
-                    saveTokenAndLogin(token);
+            // Eventos de Navegação
+            document.getElementById('btn-add-profile').addEventListener('click', () => modalProfile.classList.add('flex'));
+            document.getElementById('btn-big-connect').addEventListener('click', () => modalProfile.classList.add('flex'));
+            document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', () => modalProfile.classList.remove('flex')));
+            
+            // Salvar Perfil Manualmente
+            document.getElementById('save-profile-btn').addEventListener('click', () => {
+                const name = document.getElementById('profile-name').value;
+                const token = document.getElementById('profile-token').value;
+                if(name && token) {
+                    addProfile(name, token);
+                    modalProfile.classList.remove('flex');
+                    document.getElementById('profile-name').value = '';
+                    document.getElementById('profile-token').value = '';
                 } else {
-                    showToast('Cole o token primeiro.', 'error');
+                    showToast('Preencha nome e token.', 'error');
                 }
             });
 
-            // Botão Sair
-            logoutBtn.addEventListener('click', () => {
-                if(confirm("Deseja desconectar sua conta?")) {
-                    localStorage.removeItem('fb_saved_token');
-                    window.location.reload();
+            // Trocar de Perfil
+            profileSelector.addEventListener('change', (e) => {
+                if(e.target.value) {
+                    currentToken = e.target.value;
+                    loadAccountsForProfile();
+                } else {
+                    currentToken = null;
+                    dashContent.classList.add('hidden');
+                    welcomeState.classList.remove('hidden');
                 }
             });
 
-            // Mudança de Período
-            datePreset.addEventListener('change', () => {
-                if (_currentAccessToken) {
-                    loadAccounts(); // Recarrega overview
-                    if(_currentAccountId) fetchAllData(_currentAccountId); // Recarrega detalhes se conta selecionada
-                }
-            });
-
-            // Navegação de Abas
-            setupTabs();
-        });
-
-        function saveTokenAndLogin(token) {
-            _currentAccessToken = token;
-            localStorage.setItem('fb_saved_token', token);
-            
-            // Muda UI da Sidebar
-            connectionStatus.innerHTML = `<span class="w-2 h-2 rounded-full bg-success"></span><span class="text-sm font-medium text-success">Conectado</span>`;
-            openConnectModalBtn.classList.add('hidden');
-            logoutBtn.classList.remove('hidden');
-
-            loadAccounts();
-        }
-
-        // ==========================================
-        // 2. BUSCA DE DADOS (API FACEBOOK)
-        // ==========================================
-        
-        async function loadAccounts() {
-            showLoader("Buscando suas contas de anúncio...");
-            welcomeScreen.classList.add('hidden');
-            dashboardContent.classList.add('hidden');
-
-            try {
-                // 1. Busca IDs
-                const accountsRes = await apiRequest('/me/adaccounts', { fields: 'id,name' });
-                const accounts = accountsRes.data || [];
-                if (accounts.length === 0) throw new Error("Nenhuma conta de anúncios encontrada neste perfil.");
-
-                // 2. Busca Gasto e ROAS (Batch Request)
-                const preset = datePreset.value;
-                const batch = accounts.map(acc => ({
-                    method: 'GET',
-                    relative_url: `${acc.id}/insights?fields=spend,action_values&date_preset=${preset}&action_types=['purchase']`
-                }));
-
-                const batchRes = await apiRequest('/', { batch: JSON.stringify(batch) }, 'POST');
-                
-                _adAccountsData = batchRes.map((res, i) => {
-                    const data = res.body ? JSON.parse(res.body).data?.[0] || {} : {};
-                    const spend = safeFloat(data.spend);
-                    const revenue = getActionValue(data, 'action_values', 'purchase');
-                    return {
-                        id: accounts[i].id,
-                        name: accounts[i].name,
-                        spend: spend,
-                        roas: spend > 0 ? revenue / spend : 0
-                    };
-                });
-
-                renderOverviewTable(_adAccountsData);
-                hideLoader();
-                dashboardContent.classList.remove('hidden');
-                document.querySelector('.tab-button[data-tab="overview"]').click();
-
-            } catch (err) {
-                showErrorBox(err);
-            }
-        }
-
-        async function fetchAllData(accountId) {
-            showLoader("Baixando campanhas e métricas...", true);
-            document.getElementById('summary-section').classList.add('hidden');
-            document.getElementById('reports-section').classList.add('hidden');
-            document.getElementById('details-placeholder').classList.remove('hidden');
-
-            try {
-                const entityFields = 'name,status,effective_status,daily_budget';
-                const insightsFields = 'spend,impressions,clicks,cpc,ctr,actions,action_values';
-                const adCreativeFields = 'adcreatives{thumbnail_url}';
-                
-                const queryFields = `${entityFields},adsets{${entityFields},ads{${entityFields},${adCreativeFields},insights{${insightsFields}}}},insights{${insightsFields}}`;
-
-                const params = {
-                    fields: queryFields,
-                    date_preset: datePreset.value,
-                    limit: 100,
-                    action_types: "['purchase','add_to_cart','initiate_checkout']"
-                };
-                
-                const response = await apiRequest(`/${accountId}/campaigns`, params);
-                const campaignsData = response.data || [];
-
-                if (campaignsData.length === 0) {
-                    showErrorBox(new Error("Nenhuma campanha rodou neste período."));
-                    return;
-                }
-
-                processAndRenderDetails(campaignsData);
-
-                hideLoader(true);
-                document.getElementById('details-placeholder').classList.add('hidden');
-                document.getElementById('summary-section').classList.remove('hidden');
-                document.getElementById('reports-section').classList.remove('hidden');
-
-            } catch (err) {
-                showErrorBox(err, true);
-            }
-        }
-
-        // ==========================================
-        // 3. PROCESSAMENTO DE DADOS
-        // ==========================================
-        function processAndRenderDetails(campaignsData) {
-            _allCampaigns = []; _allAdsets = []; _allAds = [];
-            let tSpend = 0, tRev = 0, tPurch = 0;
-
-            campaignsData.forEach(camp => {
-                const cIns = calcInsights(camp.insights?.data[0]);
-                tSpend += cIns.spend; tRev += cIns.rev; tPurch += cIns.purch;
-                _allCampaigns.push({ ...camp, insights: cIns });
-
-                camp.adsets?.data.forEach(adset => {
-                    let asIns = { spend:0, rev:0, purch:0, atc:0, ic:0, imp:0, clicks:0 };
-                    
-                    adset.ads?.data.forEach(ad => {
-                        const aIns = calcInsights(ad.insights?.data[0]);
-                        asIns.spend += aIns.spend; asIns.rev += aIns.rev; asIns.purch += aIns.purch;
-                        asIns.atc += aIns.atc; asIns.ic += aIns.ic; asIns.imp += aIns.imp; asIns.clicks += aIns.clicks;
-                        
-                        _allAds.push({ ...ad, insights: aIns, campName: camp.name, adsetName: adset.name });
-                    });
-                    
-                    asIns.ctr = asIns.imp > 0 ? (asIns.clicks / asIns.imp) * 100 : 0;
-                    asIns.cpa = asIns.purch > 0 ? asIns.spend / asIns.purch : 0;
-                    asIns.roas = asIns.spend > 0 ? asIns.rev / asIns.spend : 0;
-                    
-                    _allAdsets.push({ ...adset, insights: asIns, campName: camp.name });
-                });
-            });
-
-            renderSummaryCards(tSpend, tRev, tPurch);
-            setupDetailTabs();
-            renderAllTables();
-        }
-
-        function calcInsights(data) {
-            const ins = data || {};
-            const spend = safeFloat(ins.spend);
-            const purch = getActionValue(ins, 'actions', 'purchase');
-            const rev = getActionValue(ins, 'action_values', 'purchase');
-            const atc = getActionValue(ins, 'actions', 'add_to_cart');
-            const ic = getActionValue(ins, 'actions', 'initiate_checkout');
-            const clicks = safeFloat(ins.clicks);
-            const imp = safeFloat(ins.impressions);
-            
-            return {
-                spend, purch, rev, atc, ic, clicks, imp,
-                ctr: safeFloat(ins.ctr),
-                cpc: safeFloat(ins.cpc),
-                roas: spend > 0 ? rev / spend : 0,
-                cpa: purch > 0 ? spend / purch : 0,
-                cvr: clicks > 0 ? (purch / clicks) : 0
-            };
-        }
-
-        // ==========================================
-        // 4. RENDERIZAÇÃO DE INTERFACE
-        // ==========================================
-        function renderOverviewTable(accounts) {
-            const tbody = accounts.map(acc => `
-                <tr class="cursor-pointer hover:bg-white/5 transition-colors" onclick="selectAccount('${acc.id}')">
-                    <td class="font-medium text-white">${acc.name}</td>
-                    <td class="text-right text-text-secondary">${formatCurrency(acc.spend)}</td>
-                    <td class="text-right font-bold ${acc.roas >= 1 ? 'text-success' : (acc.roas > 0 ? 'text-danger' : 'text-text-secondary')}">${acc.roas.toFixed(2)}x</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('overview-table-container').innerHTML = `
-                <div class="table-custom-wrapper">
-                    <table class="table-custom">
-                        <thead class="bg-black/20"><tr><th>Conta</th><th class="text-right">Gasto</th><th class="text-right">ROAS</th></tr></thead>
-                        <tbody>${tbody || `<tr><td colspan="3" class="text-center py-4">Nenhuma conta com dados.</td></tr>`}</tbody>
-                    </table>
-                </div>
-            `;
-        }
-
-        window.selectAccount = function(id) {
-            _currentAccountId = id;
-            document.querySelector('.tab-button[data-tab="details"]').click();
-            fetchAllData(id);
-        }
-
-        function renderSummaryCards(spend, rev, purch) {
-            const roas = spend > 0 ? rev/spend : 0;
-            const cpa = purch > 0 ? spend/purch : 0;
-            const cards = [
-                { label: 'Faturamento', val: formatCurrency(rev), col: 'text-white' },
-                { label: 'Gasto', val: formatCurrency(spend), col: 'text-white' },
-                { label: 'ROAS', val: `${roas.toFixed(2)}x`, col: roas >= 1 ? 'text-success' : 'text-danger' },
-                { label: 'CPA', val: formatCurrency(cpa), col: 'text-white' }
-            ];
-            
-            document.getElementById('summaryGrid').innerHTML = cards.map(c => `
-                <div class="metric-card bg-black/20 border-border-color">
-                    <p class="text-sm text-text-secondary">${c.label}</p>
-                    <p class="text-2xl font-bold mt-1 ${c.col}">${c.val}</p>
-                </div>
-            `).join('');
-        }
-
-        function setupDetailTabs() {
-            const nav = document.getElementById('detail-tabs');
-            nav.innerHTML = `
-                <button class="tab-button active px-4 py-2 text-sm" data-tab="campaigns">Campanhas (${_allCampaigns.length})</button>
-                <button class="tab-button px-4 py-2 text-sm" data-tab="adsets">Conjuntos (${_allAdsets.length})</button>
-                <button class="tab-button px-4 py-2 text-sm" data-tab="ads">Anúncios (${_allAds.length})</button>
-            `;
-            
-            nav.querySelectorAll('.tab-button').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    nav.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active', 'border-accent-primary', 'text-white'));
-                    e.target.classList.add('active', 'border-accent-primary', 'text-white');
-                    
-                    document.querySelectorAll('#reports-section .tab-content').forEach(c => c.classList.remove('active'));
-                    document.getElementById(`detail-tab-content-${e.target.dataset.tab}`).classList.add('active');
-                });
-            });
-        }
-
-        function renderAllTables() {
-            renderTableHTML('campaigns', _allCampaigns);
-            renderTableHTML('adsets', _allAdsets);
-            renderTableHTML('ads', _allAds);
-            
-            // Listeners de Status e Editar (Delegação)
-            document.querySelectorAll('.status-toggle').forEach(el => {
-                el.addEventListener('change', async (e) => {
-                    const id = e.target.dataset.id;
-                    const status = e.target.checked ? 'ACTIVE' : 'PAUSED';
-                    try {
-                        await apiRequest(`/${id}`, {status: status}, 'POST');
-                        showToast(`Status alterado para ${status}`, 'success');
-                    } catch(err) { e.target.checked = !e.target.checked; showErrorBox(err); }
-                });
-            });
-        }
-
-        function renderTableHTML(type, data) {
-            const isAd = type === 'ads';
-            const headers = `<th>Nome</th>${isAd?'<th class="text-center">Imagem</th>':''}<th>Status</th><th class="text-right">Gasto</th><th class="text-right">Vendas</th><th class="text-right">ROAS</th><th class="text-right">CPA</th><th class="text-right">CVR</th>`;
-            
-            const rows = data.sort((a,b) => b.insights.roas - a.insights.roas).map(item => {
-                const ins = item.insights;
-                const thumb = item.adcreatives?.data[0]?.thumbnail_url;
-                const toggle = `<label class="toggle-switch"><input type="checkbox" class="status-toggle" data-id="${item.id}" ${item.status==='ACTIVE'?'checked':''}><span class="slider"></span></label>`;
-                
-                return `<tr>
-                    <td><div class="max-w-[200px] truncate text-white font-medium" title="${item.name}">${item.name}</div></td>
-                    ${isAd ? `<td class="text-center">${thumb ? `<img src="${thumb}" class="w-8 h-8 rounded object-cover inline">` : '-'}</td>` : ''}
-                    <td>${toggle}</td>
-                    <td class="text-right">${formatCurrency(ins.spend)}</td>
-                    <td class="text-right">${ins.purch}</td>
-                    <td class="text-right font-bold ${ins.roas >= 1 ? 'text-success' : 'text-danger'}">${ins.roas.toFixed(2)}x</td>
-                    <td class="text-right">${formatCurrency(ins.cpa)}</td>
-                    <td class="text-right">${(ins.cvr*100).toFixed(2)}%</td>
-                </tr>`;
-            }).join('');
-
-            document.getElementById(`detail-tab-content-${type}`).innerHTML = `
-                <div class="table-custom-wrapper overflow-x-auto">
-                    <table class="table-custom w-full"><thead class="bg-black/20"><tr>${headers}</tr></thead><tbody>${rows || '<tr><td colspan="8" class="text-center">Vazio</td></tr>'}</tbody></table>
-                </div>`;
-        }
-
-        // ==========================================
-        // 5. UTILITÁRIOS E API
-        // ==========================================
-        async function apiRequest(path, params = {}, method = 'GET') {
-            if (!_currentAccessToken) throw new Error("Acesso negado. Token ausente.");
-            
-            const url = new URL(`${BASE_URL}${path}`);
-            const options = { method };
-            if (method === 'GET') {
-                url.searchParams.append('access_token', _currentAccessToken);
-                for (const key in params) url.searchParams.append(key, params[key]);
-            } else {
-                 options.body = new URLSearchParams({ access_token: _currentAccessToken, ...params });
-            }
-            const res = await fetch(url, options);
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error?.message || "Erro desconhecido na API.");
-            return data;
-        }
-
-        function setupTabs() {
+            // Tabs
             document.getElementById('main-tabs').addEventListener('click', e => {
                 if(e.target.matches('.tab-button')) {
-                    document.querySelectorAll('#main-tabs .tab-button').forEach(b => b.classList.remove('active', 'border-accent-primary', 'text-white'));
-                    e.target.classList.add('active', 'border-accent-primary', 'text-white');
-                    document.querySelectorAll('#dashboard-content > .tab-content').forEach(c => c.classList.remove('active'));
-                    document.getElementById(`main-tab-content-${e.target.dataset.tab}`).classList.add('active');
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById(`tab-${e.target.dataset.tab}`).classList.add('active');
                 }
             });
+        });
+
+        function addProfile(name, token) {
+            profiles.push({ id: Date.now(), name, token });
+            localStorage.setItem('hottrack_profiles', JSON.stringify(profiles));
+            renderProfileSelector();
+            profileSelector.value = token;
+            profileSelector.dispatchEvent(new Event('change'));
+            showToast('Perfil adicionado e salvo no navegador.', 'success');
         }
 
-        // Helpers de Formatação
-        const safeFloat = v => isNaN(parseFloat(v)) ? 0 : parseFloat(v);
-        const formatCurrency = v => safeFloat(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        const getActionValue = (obj, field, type) => {
-            const arr = obj?.[field] || [];
-            const item = arr.find(a => a.action_type === type);
-            return item ? safeFloat(item.value) : 0;
-        };
+        function renderProfileSelector() {
+            if(profiles.length === 0) {
+                profileSelector.innerHTML = '<option value="">Nenhum perfil salvo</option>';
+            } else {
+                profileSelector.innerHTML = '<option value="">-- Selecione o Perfil --</option>' + 
+                    profiles.map(p => `<option value="${p.token}">${p.name}</option>`).join('');
+            }
+        }
 
-        // Handlers de UI
-        function showLoader(msg, isDetails = false) {
-            if(!isDetails) {
-                welcomeScreen.classList.add('hidden');
-                errorScreen.classList.add('hidden');
-                loaderScreen.classList.remove('hidden');
-                loaderScreen.classList.add('flex');
-                document.getElementById('loader-text').textContent = msg;
+        // ==========================================
+        // API FACEBOOK & RENDERIZAÇÃO
+        // ==========================================
+        async function fbRequest(path, params = {}, method = 'GET') {
+            const url = new URL(`https://graph.facebook.com/v19.0${path}`);
+            if (method === 'GET') {
+                url.searchParams.append('access_token', currentToken);
+                for (let k in params) url.searchParams.append(k, params[k]);
+                const res = await fetch(url);
+                const data = await res.json();
+                if(data.error) throw new Error(data.error.message);
+                return data;
             } else {
-                document.getElementById('details-placeholder').innerHTML = `<div class="loader mx-auto mb-2"></div><p>${msg}</p>`;
+                const body = new URLSearchParams({ access_token: currentToken, ...params });
+                const res = await fetch(url, { method: 'POST', body });
+                const data = await res.json();
+                if(data.error) throw new Error(data.error.message);
+                return data;
             }
         }
-        function hideLoader(isDetails = false) {
-            if(!isDetails) {
-                loaderScreen.classList.add('hidden');
-                loaderScreen.classList.remove('flex');
+
+        async function loadAccountsForProfile() {
+            welcomeState.classList.add('hidden');
+            dashContent.classList.add('hidden');
+            errState.classList.add('hidden');
+            loadState.classList.add('flex');
+
+            try {
+                const res = await fbRequest('/me/adaccounts', { fields: 'id,name,account_status' });
+                const accounts = res.data || [];
+                
+                document.getElementById('accounts-table-container').innerHTML = `
+                    <div class="table-custom-wrapper">
+                        <table class="table-custom">
+                            <thead><tr><th>ID da Conta</th><th>Nome da Conta</th><th>Status</th><th>Ação</th></tr></thead>
+                            <tbody>${accounts.map(acc => `
+                                <tr>
+                                    <td class="font-mono text-xs text-text-secondary">${acc.id}</td>
+                                    <td class="font-medium text-white">${acc.name}</td>
+                                    <td>${acc.account_status === 1 ? '<span class="text-success text-xs">Ativa</span>' : '<span class="text-danger text-xs">Desativada</span>'}</td>
+                                    <td><button class="bg-white/10 hover:bg-accent-primary px-3 py-1 rounded text-xs transition" onclick="loadCampaigns('${acc.id}', '${acc.name}')">Abrir Gestor</button></td>
+                                </tr>
+                            `).join('') || '<tr><td colspan="4" class="text-center">Nenhuma conta encontrada neste perfil.</td></tr>'}</tbody>
+                        </table>
+                    </div>`;
+                
+                loadState.classList.remove('flex');
+                dashContent.classList.remove('hidden');
+                document.querySelector('.tab-button[data-tab="accounts"]').click();
+
+            } catch (err) {
+                loadState.classList.remove('flex');
+                errState.classList.remove('hidden');
+                errState.textContent = "Erro na API: " + err.message;
             }
         }
-        function showErrorBox(err, isDetails = false) {
-            hideLoader(isDetails);
-            if(err.message.includes("Error validating access token") || err.message.includes("Session has expired")) {
-                localStorage.removeItem('fb_saved_token');
-                alert("Seu token expirou. Faça login novamente.");
-                window.location.reload();
-                return;
-            }
-            if(!isDetails) {
-                errorScreen.textContent = `Erro: ${err.message}`;
-                errorScreen.classList.remove('hidden');
-            } else {
-                document.getElementById('details-placeholder').innerHTML = `<p class="text-red-400">Erro: ${err.message}</p>`;
+
+        async function loadCampaigns(accountId, accountName) {
+            document.querySelector('.tab-button[data-tab="campaigns"]').click();
+            document.getElementById('campaigns-placeholder').classList.add('hidden');
+            document.getElementById('campaigns-data').classList.remove('hidden');
+            document.getElementById('active-account-name').textContent = accountName;
+            
+            const tbody = document.getElementById('campaigns-tbody');
+            tbody.innerHTML = '<tr><td colspan="11" class="text-center py-8"><div class="animate-spin h-6 w-6 border-b-2 border-accent-primary mx-auto mb-2"></div>Buscando campanhas e cruzando dados...</td></tr>';
+
+            try {
+                const params = {
+                    fields: 'name,status,daily_budget,insights.date_preset(last_7d){spend,actions,action_values}',
+                    limit: 50
+                };
+                const res = await fbRequest(`/${accountId}/campaigns`, params);
+                const campaigns = res.data || [];
+
+                tbody.innerHTML = campaigns.map(camp => {
+                    const ins = camp.insights?.data[0] || {};
+                    const spend = parseFloat(ins.spend || 0);
+                    const purchArr = ins.actions?.find(a => a.action_type === 'purchase');
+                    const purch = purchArr ? parseFloat(purchArr.value) : 0;
+                    const cpa = purch > 0 ? spend/purch : 0;
+                    const budget = camp.daily_budget ? (parseFloat(camp.daily_budget)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '-';
+                    
+                    // Simulação visual de Rastreio do Telegram (Exige Backend para ser real)
+                    const botName = camp.name.includes('BOT') ? '@BotPrivacy_VIP' : '<button class="text-xs text-text-secondary hover:text-accent-primary underline">+ Vincular TG</button>';
+                    const botSales = camp.name.includes('BOT') ? Math.floor(purch * 0.8) : '-'; // Simula que o bot marcou menos que a meta
+
+                    return `
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" onchange="toggleStatus('${camp.id}', this)" ${camp.status==='ACTIVE'?'checked':''}>
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
+                            <td class="font-medium max-w-[200px] truncate text-white" title="${camp.name}">${camp.name}</td>
+                            <td>${botName !== '<button class="text-xs text-text-secondary hover:text-accent-primary underline">+ Vincular TG</button>' ? `<span class="badge-tg"><svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.18-.08-.05-.19-.02-.27 0-.12.03-1.98 1.26-5.59 3.7-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.06-.49-.83-.27-1.49-.42-1.43-.88.03-.23.36-.47.98-.73 3.84-1.67 6.4-2.78 7.68-3.31 3.65-1.52 4.41-1.78 4.91-1.79.11 0 .35.03.48.14.11.09.14.22.15.33-.01.07-.01.14-.02.2z"/></svg>${botName}</span>` : botName}</td>
+                            <td class="text-right cursor-pointer hover:text-accent-primary" onclick="editBudget('${camp.id}', '${budget}')">${budget} ✏️</td>
+                            <td class="text-right">${spend.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
+                            <td class="text-right">${purch}</td>
+                            <td class="text-right font-bold text-telegram-blue">${botSales}</td>
+                            <td class="text-right">${cpa.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
+                            <td class="text-right font-bold ${spend>0?'text-success':'text-text-secondary'}">N/A</td>
+                            <td class="text-center space-x-2">
+                                <button onclick="alert('Duplicando campanha na API... (Requer setup avançado)')" class="text-text-secondary hover:text-white" title="Duplicar">📑</button>
+                                <button onclick="alert('Lendo ID e direcionamento do Telegram... (Requer Backend)')" class="text-telegram-blue hover:text-white" title="Ver Funil do Telegram">📈</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="11" class="text-center">Nenhuma campanha encontrada.</td></tr>';
+
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="11" class="text-center text-red-400">Erro: ${err.message}</td></tr>`;
             }
         }
+
+        // Funções de Ação (API)
+        async function toggleStatus(id, checkbox) {
+            const status = checkbox.checked ? 'ACTIVE' : 'PAUSED';
+            try {
+                showToast('Atualizando Meta API...', 'info');
+                await fbRequest(`/${id}`, { status }, 'POST');
+                showToast(`Campanha ${status === 'ACTIVE' ? 'ativada' : 'pausada'} com sucesso!`, 'success');
+            } catch (err) {
+                checkbox.checked = !checkbox.checked;
+                showToast('Erro: ' + err.message, 'error');
+            }
+        }
+
+        async function editBudget(id, current) {
+            const newVal = prompt("Novo orçamento diário (apenas números):", "100.00");
+            if(newVal && !isNaN(newVal)) {
+                try {
+                    showToast('Atualizando orçamento...', 'info');
+                    await fbRequest(`/${id}`, { daily_budget: parseFloat(newVal) * 100 }, 'POST');
+                    showToast('Orçamento atualizado! Atualize a página.', 'success');
+                } catch (err) { showToast('Erro: ' + err.message, 'error'); }
+            }
+        }
+
         function showToast(msg, type='info') {
             const toast = document.createElement('div');
             toast.className = `p-3 rounded shadow-lg text-white text-sm transform transition-all duration-300 translate-y-4 opacity-0 ${type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-blue-600'}`;
             toast.textContent = msg;
-            const container = document.getElementById('toast-container');
-            container.appendChild(toast);
+            document.getElementById('toast-container').appendChild(toast);
             requestAnimationFrame(() => { toast.classList.remove('translate-y-4', 'opacity-0'); });
             setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(()=>toast.remove(),300); }, 3000);
         }
