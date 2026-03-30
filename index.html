@@ -3,44 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HotTrack PRO - Gerenciamento Avançado</title>
+    <title>HotTrack PRO - Gerenciamento Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #050505;
-            --bg-secondary: #0a0a0a;
-            --bg-card: #141414;
-            --border-color: #262626;
-            --accent-primary: #3b82f6;
-            --accent-hover: #2563eb;
-            --telegram-blue: #0088cc;
-            --text-primary: #f5f5f5;
-            --text-secondary: #a3a3a3;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --warning: #facc15;
+            --bg-primary: #050505; --bg-secondary: #0a0a0a; --bg-card: #141414;
+            --border-color: #262626; --accent-primary: #3b82f6; --accent-hover: #2563eb;
+            --text-primary: #f5f5f5; --text-secondary: #a3a3a3;
+            --success: #22c55e; --danger: #ef4444; --warning: #facc15;
         }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
         .form-input, .form-select { background-color: #0a0a0a; border: 1px solid var(--border-color); color: white; border-radius: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
         .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 1px var(--accent-primary); }
         .btn-primary { background-color: var(--accent-primary); color: white; font-weight: 500; border-radius: 0.5rem; padding: 0.75rem 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: 0.2s; border: none; }
         .btn-primary:hover { background-color: var(--accent-hover); }
-        .btn-outline { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: 0.2s; font-size: 0.875rem;}
-        .btn-outline:hover { color: white; border-color: white; }
         .table-custom-wrapper { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden; }
         .table-custom { border-collapse: collapse; width: 100%; text-align: left; }
         .table-custom th, .table-custom td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.875rem; }
-        .table-custom th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em; background: #0a0a0a; }
+        .table-custom th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; background: #0a0a0a; }
         .table-custom tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
         .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; }
         .modal.flex { display: flex; }
         .modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); cursor: pointer;}
         .modal-content { position: relative; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 1rem; width: 100%; max-width: 500px; overflow: hidden; z-index: 101;}
-        .tab-button { background: transparent; border: none; color: var(--text-secondary); padding: 1rem 0; margin-right: 2rem; border-bottom: 2px solid transparent; font-weight: 500; cursor: pointer; transition: 0.2s; }
-        .tab-button.active { color: white; border-bottom-color: var(--accent-primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
         .toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .4s; border-radius: 34px; }
@@ -64,8 +50,8 @@
         <div class="p-4 flex-1 overflow-y-auto">
             <div class="mb-6">
                 <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis Conectados</label>
-                    <button id="btn-add-profile" class="text-xs text-accent-primary hover:text-white">+ Novo</button>
+                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis / BMs</label>
+                    <button id="btn-add-profile" class="text-xs text-accent-primary hover:text-white">+ Adicionar</button>
                 </div>
                 <select id="profile-selector" class="form-select text-sm bg-card mb-2">
                     <option value="">Nenhum perfil ativo...</option>
@@ -79,77 +65,66 @@
                     <option value="yesterday">Ontem</option>
                     <option value="last_7d" selected>Últimos 7 dias</option>
                     <option value="last_30d">Últimos 30 dias</option>
-                    <option value="maximum">Máximo</option>
                 </select>
+            </div>
+            
+            <div class="mt-8 border-t border-border-color pt-6">
+                <p class="text-xs text-text-secondary mb-2 uppercase tracking-wider">Ações em Massa</p>
+                <button onclick="alert('Função de Servidor: A troca de criativos em massa exige upload via backend para evitar bloqueios de CORS.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🔄 Trocar Criativos (Escala)</button>
+                <button onclick="alert('Função de Servidor: O cruzamento com o Telegram exige Banco de Dados.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🤖 Vincular Bot Telegram</button>
             </div>
         </div>
     </aside>
 
     <main class="flex-1 overflow-y-auto p-8 relative">
         <div id="welcome-state" class="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center">
-            <svg class="w-16 h-16 text-border-color mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-            <h2 class="text-2xl font-bold text-white mb-2">Conecte sua API</h2>
-            <p class="text-text-secondary mb-6">Para testar o aplicativo na Meta, conecte seu perfil oficial abaixo e realize uma ação (pausar, editar, criar).</p>
-            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Autenticar com Meta</button>
+            <h2 class="text-2xl font-bold text-white mb-2">Central de Operações</h2>
+            <p class="text-text-secondary mb-6">Conecte um perfil oficial para visualizar todas as BMs e gerenciar campanhas centralizadas.</p>
+            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Perfil Meta</button>
         </div>
 
-        <div id="loading-state" class="hidden flex-col items-center justify-center h-full">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-primary mb-4"></div>
-            <p class="text-text-secondary" id="loading-text">Comunicando com a Graph API...</p>
-        </div>
-
-        <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-4 rounded-lg mb-6 flex flex-col items-center text-center">
-            <svg class="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <strong class="font-bold block text-lg">Erro na API da Meta</strong>
-            <span class="block text-sm mt-1" id="error-text">Ocorreu um erro ao buscar os dados.</span>
+        <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-lg mb-6 flex-col items-center text-center shadow-xl">
+            <svg class="w-12 h-12 mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <strong class="font-bold block text-xl mb-2 text-white">O Facebook recusou a conexão!</strong>
+            <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words" id="error-text">Mensagem do erro aqui</p>
+            <p class="text-xs text-text-secondary mt-4">Analise o erro acima. Pode ser falta de permissão ou conta bloqueada.</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
-            <nav id="main-tabs" class="flex border-b border-border-color">
-                <button class="tab-button active" data-tab="accounts">Gerenciadores de Anúncios</button>
-                <button class="tab-button" data-tab="campaigns">Painel de Tráfego</button>
-            </nav>
-
-            <div id="tab-accounts" class="tab-content active">
+            <div id="accounts-section">
+                <h3 class="text-lg font-bold text-white mb-4">Gerenciadores de Anúncio (Contas)</h3>
                 <div id="accounts-table-container"></div>
             </div>
 
-            <div id="tab-campaigns" class="tab-content space-y-6">
-                <div id="campaigns-placeholder" class="text-center py-12 border border-dashed border-border-color rounded-lg text-text-secondary">
-                    Selecione uma conta na aba anterior para carregar os dados.
+            <div id="campaigns-section" class="hidden border-t border-border-color pt-6">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
+                    <div>
+                        <h3 id="active-account-name" class="text-2xl font-bold text-white"></h3>
+                        <p class="text-xs text-text-secondary font-mono" id="active-account-id"></p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btn-create-campaign" class="bg-accent-primary hover:bg-accent-hover text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
+                            + Nova Campanha
+                        </button>
+                    </div>
                 </div>
-
-                <div id="campaigns-data" class="hidden">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                        <div>
-                            <h3 id="active-account-name" class="text-lg font-bold text-white"></h3>
-                            <p class="text-xs text-text-secondary" id="active-account-id"></p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button id="btn-create-campaign" class="bg-accent-primary hover:bg-accent-hover text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Criar Campanha
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-custom-wrapper overflow-x-auto">
-                        <table class="table-custom">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Nome da Campanha</th>
-                                    <th class="text-right">Orçamento</th>
-                                    <th class="text-right">Gasto</th>
-                                    <th class="text-right">Resultados</th>
-                                    <th class="text-right">Custo por Res.</th>
-                                    <th class="text-right">ROAS</th>
-                                    <th class="text-center">Ações (API)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="campaigns-tbody"></tbody>
-                        </table>
-                    </div>
+                
+                <div class="table-custom-wrapper overflow-x-auto">
+                    <table class="table-custom">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Nome da Campanha</th>
+                                <th class="text-right">Orçamento</th>
+                                <th class="text-right">Gasto</th>
+                                <th class="text-right">Compras</th>
+                                <th class="text-right">CPA</th>
+                                <th class="text-right">ROAS</th>
+                                <th class="text-center">Ferramentas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="campaigns-tbody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -163,20 +138,14 @@
                 <button class="text-text-secondary hover:text-white close-modal">✕</button>
             </div>
             <div class="p-6 space-y-5">
-                <div class="bg-blue-900/20 border border-blue-500/30 p-3 rounded-lg">
-                    <p class="text-xs text-blue-200"><strong>Teste Obrigatório:</strong> Use o botão OAuth abaixo para validar as permissões <code class="bg-black/30 px-1 rounded">ads_management</code> para a análise da Meta.</p>
-                </div>
-                
                 <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token" class="btn-primary" style="background-color: #1877F2; text-decoration: none;">
                     Autenticar Oficialmente (OAuth)
                 </a>
-                
-                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN (Avançado)</span><div class="flex-grow border-t border-border-color"></div></div>
-                
+                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN EAAG</span><div class="flex-grow border-t border-border-color"></div></div>
                 <div class="space-y-3">
                     <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Principal)">
                     <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso Mestre (EAAG...)">
-                    <button id="save-profile-btn" class="btn-outline w-full py-2">Salvar Token Localmente</button>
+                    <button id="save-profile-btn" class="bg-white/10 hover:bg-white/20 text-white w-full py-2 rounded-lg text-sm transition">Salvar Token Localmente</button>
                 </div>
             </div>
         </div>
@@ -192,15 +161,14 @@
         
         const UI = {
             welcome: document.getElementById('welcome-state'),
-            loader: document.getElementById('loading-state'),
             dash: document.getElementById('dashboard-content'),
             selector: document.getElementById('profile-selector'),
             modalProfile: document.getElementById('add-profile-modal'),
             errorAlert: document.getElementById('error-alert'),
-            errorText: document.getElementById('error-text')
+            errorText: document.getElementById('error-text'),
+            campSection: document.getElementById('campaigns-section')
         };
 
-        // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
             const hash = window.location.hash;
             if (hash && hash.includes('access_token')) {
@@ -224,22 +192,14 @@
             });
 
             UI.selector.addEventListener('change', (e) => {
-                UI.errorAlert.classList.add('hidden'); // Esconde o erro ao trocar perfil
+                UI.errorAlert.classList.add('hidden');
+                UI.campSection.classList.add('hidden');
                 if(e.target.value) { currentToken = e.target.value; loadAccounts(); }
                 else { currentToken = null; UI.dash.classList.add('hidden'); UI.welcome.classList.remove('hidden'); }
             });
 
             document.getElementById('datePreset').addEventListener('change', () => {
                 if(currentAccountId) loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
-            });
-
-            document.getElementById('main-tabs').addEventListener('click', e => {
-                if(e.target.matches('.tab-button')) {
-                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    document.getElementById(`tab-${e.target.dataset.tab}`).classList.add('active');
-                }
             });
 
             document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
@@ -257,11 +217,11 @@
         function renderProfileSelector() {
             UI.selector.innerHTML = profiles.length === 0 
                 ? '<option value="">Nenhum perfil</option>' 
-                : '<option value="">-- Selecionar --</option>' + profiles.map(p => `<option value="${p.token}">${p.name}</option>`).join('');
+                : '<option value="">-- Selecionar Perfil --</option>' + profiles.map(p => `<option value="${p.token}">${p.name}</option>`).join('');
         }
 
         // ==========================================
-        // MOTOR DA GRAPH API
+        // MOTOR DA GRAPH API SUPER APERFEIÇOADO (CATCHER DE ERROS)
         // ==========================================
         async function apiCall(endpoint, params = {}, method = 'GET') {
             const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
@@ -275,22 +235,32 @@
                 config.body = body;
             }
 
-            const res = await fetch(url, config);
-            const data = await res.json();
-            if(data.error) {
-                console.error("API Error:", data.error);
-                throw new Error(`${data.error.message} (Código: ${data.error.code})`);
+            try {
+                const res = await fetch(url, config);
+                const data = await res.json();
+                
+                if (!res.ok || data.error) {
+                    // O SEGREDO: Captura EXATA do erro do Facebook
+                    const errMsg = data.error 
+                        ? `Tipo: ${data.error.type}\nMensagem: ${data.error.message}\nCódigo: ${data.error.code}` 
+                        : `Erro HTTP Fatal: ${res.status} - ${res.statusText}`;
+                    throw new Error(errMsg);
+                }
+                return data;
+            } catch (err) {
+                console.error("API Fetch Error:", err);
+                throw err; // Repassa para a função de carregamento
             }
-            return data;
         }
 
-        function handleVisualError(message) {
-            UI.loader.classList.add('hidden');
-            UI.dash.classList.add('hidden');
+        function handleVisualError(errorMessage) {
             UI.welcome.classList.add('hidden');
+            UI.dash.classList.add('hidden');
             
-            UI.errorText.textContent = message;
+            // Quebra as linhas do erro para ficar legível
+            UI.errorText.innerHTML = errorMessage.replace(/\n/g, '<br>');
             UI.errorAlert.classList.remove('hidden');
+            UI.errorAlert.classList.add('flex');
         }
 
         // ==========================================
@@ -298,11 +268,9 @@
         // ==========================================
         async function loadAccounts() {
             UI.welcome.classList.add('hidden');
-            UI.dash.classList.add('hidden');
             UI.errorAlert.classList.add('hidden');
-            UI.loader.classList.remove('hidden');
-            UI.loader.classList.add('flex');
-            document.getElementById('loading-text').textContent = "Buscando Contas de Anúncio...";
+            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Buscando Contas...</div>';
+            UI.dash.classList.remove('hidden');
 
             try {
                 const res = await apiCall('/me/adaccounts', { fields: 'account_id,name,account_status' });
@@ -311,22 +279,17 @@
                 document.getElementById('accounts-table-container').innerHTML = `
                     <div class="table-custom-wrapper overflow-x-auto">
                         <table class="table-custom">
-                            <thead><tr><th>ID</th><th>Nome</th><th>Status</th><th>Painel</th></tr></thead>
+                            <thead><tr><th>ID</th><th>Nome da Conta</th><th>Status</th><th>Ação</th></tr></thead>
                             <tbody>${accounts.map(acc => `
                                 <tr>
                                     <td class="font-mono text-text-secondary">act_${acc.account_id}</td>
                                     <td class="font-medium text-white">${acc.name}</td>
                                     <td>${acc.account_status === 1 ? '<span class="text-success">Ativa</span>' : '<span class="text-danger">Bloqueada/Inativa</span>'}</td>
-                                    <td><button class="bg-white/10 hover:bg-accent-primary px-3 py-1 rounded transition" onclick="loadCampaigns('act_${acc.account_id}', '${acc.name.replace(/'/g, "\\'")}')">Abrir Campanhas</button></td>
+                                    <td><button class="bg-white/10 hover:bg-accent-primary px-3 py-1 rounded transition text-sm" onclick="loadCampaigns('act_${acc.account_id}', '${acc.name.replace(/'/g, "\\'")}')">Abrir Campanhas</button></td>
                                 </tr>
                             `).join('') || '<tr><td colspan="4" class="text-center">Nenhuma conta encontrada.</td></tr>'}</tbody>
                         </table>
                     </div>`;
-                
-                UI.loader.classList.remove('flex');
-                UI.loader.classList.add('hidden');
-                UI.dash.classList.remove('hidden');
-                document.querySelector('.tab-button[data-tab="accounts"]').click();
             } catch (err) {
                 handleVisualError(err.message);
             }
@@ -334,14 +297,13 @@
 
         async function loadCampaigns(accountId, accountName) {
             currentAccountId = accountId;
-            document.querySelector('.tab-button[data-tab="campaigns"]').click();
-            document.getElementById('campaigns-placeholder').classList.add('hidden');
-            document.getElementById('campaigns-data').classList.remove('hidden');
+            UI.errorAlert.classList.add('hidden');
+            UI.campSection.classList.remove('hidden');
             document.getElementById('active-account-name').textContent = accountName;
             document.getElementById('active-account-id').textContent = accountId;
             
             const tbody = document.getElementById('campaigns-tbody');
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8"><div class="animate-spin h-6 w-6 border-b-2 border-accent-primary mx-auto mb-2"></div>Buscando campanhas (ads_read)...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-text-secondary animate-pulse">Baixando métricas (ads_read)...</td></tr>';
 
             try {
                 const preset = document.getElementById('datePreset').value;
@@ -349,9 +311,10 @@
                     fields: 'name,status,daily_budget,insights.date_preset(' + preset + '){spend,actions,action_values}',
                     limit: 100
                 };
+                
+                // Se esse endpoint der erro, o catch abaixo joga na tela gigante!
                 const res = await apiCall(`/${accountId}/campaigns`, params);
                 const campaigns = res.data || [];
-
                 const activeCamps = campaigns.filter(c => c.status !== 'DELETED');
 
                 tbody.innerHTML = activeCamps.map(camp => {
@@ -389,77 +352,75 @@
                             <td class="text-right">${cpa.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
                             <td class="text-right font-bold ${roas >= 1 ? 'text-success' : (roas>0?'text-danger':'text-text-secondary')}">${roas.toFixed(2)}x</td>
                             <td class="text-center space-x-3">
-                                <span class="action-icon text-warning" onclick="actionDuplicate('${camp.id}')" title="Duplicar">📑</span>
+                                <span class="action-icon text-warning" onclick="actionDuplicate('${camp.id}')" title="Duplicar Rápido">📑</span>
                                 <span class="action-icon text-danger" onclick="actionArchive('${camp.id}')" title="Arquivar">🗄️</span>
                             </td>
                         </tr>
                     `;
-                }).join('') || '<tr><td colspan="8" class="text-center text-text-secondary">Nenhuma campanha ativa encontrada.</td></tr>';
+                }).join('') || '<tr><td colspan="8" class="text-center text-text-secondary py-6">Nenhuma campanha rodando.</td></tr>';
 
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-red-500 font-bold">Erro: ${err.message}</td></tr>`;
+                // EXIBE O ERRO DA API DIRETO NA TABELA
+                tbody.innerHTML = `<tr><td colspan="8" class="p-0"><div class="bg-red-900/40 p-6 text-center text-red-400 font-mono text-xs whitespace-pre-wrap">${err.message}</div></td></tr>`;
+                
+                // E também chama o erro gigante para garantir
+                handleVisualError("Erro ao carregar Campanhas:\n" + err.message);
             }
         }
 
         // ==========================================
-        // FUNÇÕES DE AÇÃO DA API (ads_management)
+        // FUNÇÕES DE AÇÃO DA API
         // ==========================================
         async function actionToggleStatus(id, checkbox) {
             const newStatus = checkbox.checked ? 'ACTIVE' : 'PAUSED';
             try {
-                showToast(`Enviando POST status=${newStatus}...`, 'info');
+                showToast(`Salvando...`, 'info');
                 await apiCall(`/${id}`, { status: newStatus }, 'POST');
-                showToast(`Campanha ${newStatus === 'ACTIVE' ? 'Ativada' : 'Pausada'}!`, 'success');
+                showToast(`Sucesso!`, 'success');
             } catch (err) {
                 checkbox.checked = !checkbox.checked;
-                showToast('Falha: ' + err.message, 'error');
+                handleVisualError(err.message);
             }
         }
 
         async function actionRename(id, currentName) {
-            const newName = prompt("Renomear Campanha para:", currentName);
+            const newName = prompt("Novo Nome:", currentName);
             if(newName && newName !== currentName) {
                 try {
-                    showToast(`Enviando POST name=${newName}...`, 'info');
                     await apiCall(`/${id}`, { name: newName }, 'POST');
                     document.getElementById(`name-${id}`).textContent = newName;
-                    showToast('Nome atualizado na Meta!', 'success');
-                } catch (err) { showToast('Falha: ' + err.message, 'error'); }
+                    showToast('Nome atualizado!', 'success');
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
-        async function actionEditBudget(id, currentBudgetInCents) {
-            const currentFormatted = currentBudgetInCents ? (currentBudgetInCents/100).toFixed(2) : "100.00";
-            const newVal = prompt("Novo orçamento diário (Ex: 50.00):", currentFormatted);
+        async function actionEditBudget(id, currentBudget) {
+            const newVal = prompt("Novo orçamento diário:", currentBudget ? (currentBudget/100).toFixed(2) : "100.00");
             if(newVal && !isNaN(newVal)) {
                 try {
-                    const budgetCents = parseFloat(newVal) * 100;
-                    showToast(`Enviando POST daily_budget=${budgetCents}...`, 'info');
-                    await apiCall(`/${id}`, { daily_budget: budgetCents }, 'POST');
-                    showToast('Orçamento alterado com sucesso! Atualize a página.', 'success');
-                } catch (err) { showToast('Falha: ' + err.message, 'error'); }
+                    await apiCall(`/${id}`, { daily_budget: parseFloat(newVal) * 100 }, 'POST');
+                    showToast('Orçamento alterado! Dê F5.', 'success');
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
         async function actionArchive(id) {
-            if(confirm("Deseja ARQUIVAR esta campanha na Meta? Ela sumirá do painel ativo.")) {
+            if(confirm("ARQUIVAR campanha?")) {
                 try {
-                    showToast(`Enviando POST status=ARCHIVED...`, 'info');
                     await apiCall(`/${id}`, { status: 'ARCHIVED' }, 'POST');
                     document.getElementById(`row-${id}`).style.display = 'none';
                     showToast('Campanha arquivada.', 'success');
-                } catch (err) { showToast('Falha: ' + err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
         async function actionDuplicate(id) {
-            if(confirm("Deseja criar uma CÓPIA pausada desta campanha?")) {
+            if(confirm("Criar uma cópia na BM?")) {
                 try {
-                    showToast(`Enviando POST /copies...`, 'info');
-                    await apiCall(`/${id}/copies`, { status: 'PAUSED', rename_prefix: 'Cópia Braintrack - ' }, 'POST');
-                    showToast('Campanha duplicada! Recarregando painel...', 'success');
+                    await apiCall(`/${id}/copies`, { status: 'PAUSED' }, 'POST');
+                    showToast('Cópia gerada!', 'success');
                     setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 2000);
-                } catch (err) { showToast('Falha: ' + err.message, 'error'); }
+                } catch (err) { handleVisualError(err.message); }
             }
         }
 
@@ -469,20 +430,13 @@
             if(!campName) return;
 
             try {
-                showToast(`Enviando POST /campaigns (Criando)...`, 'info');
-                const params = {
-                    name: campName,
-                    objective: 'OUTCOME_SALES',
-                    status: 'PAUSED',
-                    special_ad_categories: '[]'
-                };
-                
-                await apiCall(`/${currentAccountId}/campaigns`, params, 'POST');
-                showToast('Campanha criada com sucesso!', 'success');
-                
+                await apiCall(`/${currentAccountId}/campaigns`, {
+                    name: campName, objective: 'OUTCOME_SALES', status: 'PAUSED', special_ad_categories: '[]'
+                }, 'POST');
+                showToast('Criada!', 'success');
                 setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
             } catch (err) {
-                showToast('Falha ao criar: ' + err.message, 'error');
+                handleVisualError(err.message);
             }
         }
 
@@ -492,7 +446,7 @@
             toast.textContent = msg;
             document.getElementById('toast-container').appendChild(toast);
             requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0'));
-            setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(()=>toast.remove(),300); }, 4000);
+            setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(()=>toast.remove(),300); }, 3000);
         }
     </script>
 </body>
