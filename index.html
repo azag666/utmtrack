@@ -80,13 +80,13 @@
     <main class="flex-1 overflow-y-auto p-8 relative">
         <div id="welcome-state" class="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center">
             <h2 class="text-2xl font-bold text-white mb-2">Central de Operações</h2>
-            <p class="text-text-secondary mb-6">Conecte um perfil da Meta para visualizar todas as Contas e gerenciar Campanhas.</p>
-            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Perfil Meta</button>
+            <p class="text-text-secondary mb-6">Conecte um perfil da Meta ou Kwai para visualizar todas as Contas e gerenciar Campanhas.</p>
+            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Perfil</button>
         </div>
 
         <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-lg mb-6 flex-col items-center text-center shadow-xl">
             <svg class="w-12 h-12 mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <strong class="font-bold block text-xl mb-2 text-white">Erro na Graph API</strong>
+            <strong class="font-bold block text-xl mb-2 text-white">Erro de Comunicação (API)</strong>
             <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words mt-2" id="error-text">Mensagem do erro aqui</p>
         </div>
 
@@ -104,7 +104,7 @@
                         <p class="text-xl font-bold text-white mt-1" id="summary-spend">R$ 0,00</p>
                     </div>
                     <div class="bg-card border border-border-color p-4 rounded-lg">
-                        <p class="text-xs text-text-secondary uppercase">Vendas Meta</p>
+                        <p class="text-xs text-text-secondary uppercase">Vendas / Conversões</p>
                         <p class="text-xl font-bold text-white mt-1" id="summary-purchases">0</p>
                     </div>
                     <div class="bg-card border border-border-color p-4 rounded-lg">
@@ -164,18 +164,25 @@
         <div class="modal-backdrop close-modal"></div>
         <div class="modal-content">
             <div class="p-5 border-b border-border-color flex justify-between items-center bg-secondary">
-                <h3 class="font-bold text-white">Conexão Graph API</h3>
+                <h3 class="font-bold text-white">Conexão de Plataforma</h3>
                 <button class="text-text-secondary hover:text-white close-modal">✕</button>
             </div>
             <div class="p-6 space-y-5">
                 <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token" class="btn-primary" style="background-color: #1877F2; text-decoration: none;">
-                    Autenticar Oficialmente (OAuth)
+                    Autenticar Oficialmente na Meta (OAuth)
                 </a>
-                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU VIA TOKEN EAAG</span><div class="flex-grow border-t border-border-color"></div></div>
+                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU ADICIONAR MANUALMENTE</span><div class="flex-grow border-t border-border-color"></div></div>
                 <div class="space-y-3">
+                    <select id="profile-platform" class="form-select text-sm font-bold text-accent-primary">
+                        <option value="meta">Meta Ads (Facebook/Instagram)</option>
+                        <option value="kwai">Kwai for Business</option>
+                    </select>
+                    
                     <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Secundário)">
-                    <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso Mestre (EAAG...)">
-                    <button id="save-profile-btn" class="bg-white/10 hover:bg-white/20 text-white w-full py-2 rounded-lg text-sm transition">Salvar Token Localmente</button>
+                    <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso (EAAG... ou Kwai Token)">
+                    <input type="text" id="kwai-advertiser-id" class="form-input text-sm font-mono hidden" placeholder="Advertiser ID (Apenas Kwai)">
+                    
+                    <button id="save-profile-btn" class="bg-white/10 hover:bg-white/20 text-white w-full py-2 rounded-lg text-sm transition">Salvar Credenciais Localmente</button>
                 </div>
             </div>
         </div>
@@ -188,6 +195,7 @@
         let profiles = JSON.parse(localStorage.getItem('hottrack_profiles')) || [];
         let currentToken = null;
         let currentAccountId = null;
+        let currentPlatform = null;
         
         const UI = {
             welcome: document.getElementById('welcome-state'),
@@ -206,8 +214,11 @@
                 const token = params.get('access_token');
                 window.history.replaceState({}, document.title, window.location.pathname);
                 const pName = prompt("Autenticado! Digite um nome para este perfil:");
-                if(pName) addProfile(pName, token);
+                if(pName) addProfile(pName, token, 'meta');
             }
+
+            // Migrar perfis antigos se existirem para incluir 'platform'
+            profiles = profiles.map(p => ({...p, platform: p.platform || 'meta'}));
 
             renderProfileSelector();
 
@@ -215,26 +226,66 @@
             document.getElementById('btn-add-profile').addEventListener('click', () => UI.modalProfile.classList.add('flex'));
             document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', () => UI.modalProfile.classList.remove('flex')));
             
-            document.getElementById('save-profile-btn').addEventListener('click', () => {
-                const n = document.getElementById('profile-name').value;
-                const t = document.getElementById('profile-token').value;
-                if(n && t) { addProfile(n, t); UI.modalProfile.classList.remove('flex'); }
+            // Alternar input do Kwai Advertiser ID
+            document.getElementById('profile-platform').addEventListener('change', (e) => {
+                const kwaiInput = document.getElementById('kwai-advertiser-id');
+                if(e.target.value === 'kwai') {
+                    kwaiInput.classList.remove('hidden');
+                } else {
+                    kwaiInput.classList.add('hidden');
+                }
             });
 
+            document.getElementById('save-profile-btn').addEventListener('click', () => {
+                const p = document.getElementById('profile-platform').value;
+                const n = document.getElementById('profile-name').value;
+                const t = document.getElementById('profile-token').value;
+                const advId = document.getElementById('kwai-advertiser-id').value;
+                
+                if(n && t) { 
+                    if(p === 'kwai' && !advId) {
+                        alert("Para o Kwai, o Advertiser ID é obrigatório.");
+                        return;
+                    }
+                    addProfile(n, t, p, advId); 
+                    UI.modalProfile.classList.remove('flex'); 
+                }
+            });
+
+            // Roteamento de Perfis
             UI.selector.addEventListener('change', (e) => {
                 UI.errorAlert.classList.add('hidden');
                 UI.campSection.classList.add('hidden');
-                if(e.target.value) { currentToken = e.target.value; loadAccounts(); }
-                else { currentToken = null; UI.dash.classList.add('hidden'); UI.welcome.classList.remove('hidden'); }
+                
+                const selectedId = e.target.value;
+                const profile = profiles.find(p => p.id == selectedId);
+
+                if(profile) { 
+                    currentToken = profile.token; 
+                    currentPlatform = profile.platform;
+                    
+                    if(currentPlatform === 'meta') {
+                        loadAccounts();
+                    } else if (currentPlatform === 'kwai') {
+                        loadKwaiAccounts(profile);
+                    }
+                } else { 
+                    currentToken = null; 
+                    currentPlatform = null;
+                    UI.dash.classList.add('hidden'); 
+                    UI.welcome.classList.remove('hidden'); 
+                }
             });
 
             document.getElementById('datePreset').addEventListener('change', () => {
-                if(currentAccountId) loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
+                if(currentAccountId) {
+                    if (currentPlatform === 'meta') loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
+                    else if (currentPlatform === 'kwai') loadKwaiCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
+                }
             });
 
             document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
 
-            // Listener Select All para Bulk Actions
             document.getElementById('select-all').addEventListener('change', (e) => {
                 const checkboxes = document.querySelectorAll('.camp-checkbox');
                 checkboxes.forEach(cb => cb.checked = e.target.checked);
@@ -242,23 +293,24 @@
             });
         });
 
-        function addProfile(name, token) {
-            profiles.push({ id: Date.now(), name, token });
+        function addProfile(name, token, platform = 'meta', advertiserId = null) {
+            const id = Date.now().toString();
+            profiles.push({ id, name, token, platform, advertiserId });
             localStorage.setItem('hottrack_profiles', JSON.stringify(profiles));
             renderProfileSelector();
-            UI.selector.value = token;
+            UI.selector.value = id;
             UI.selector.dispatchEvent(new Event('change'));
-            showToast('Perfil conectado!', 'success');
+            showToast(`Perfil ${platform.toUpperCase()} conectado!`, 'success');
         }
 
         function renderProfileSelector() {
             UI.selector.innerHTML = profiles.length === 0 
                 ? '<option value="">Nenhum perfil</option>' 
-                : '<option value="">-- Selecionar Perfil --</option>' + profiles.map(p => `<option value="${p.token}">${p.name}</option>`).join('');
+                : '<option value="">-- Selecionar Perfil --</option>' + profiles.map(p => `<option value="${p.id}">[${p.platform.toUpperCase()}] ${p.name}</option>`).join('');
         }
 
         // ==========================================
-        // MOTOR DA GRAPH API
+        // MOTOR DA GRAPH API (META)
         // ==========================================
         async function apiCall(endpoint, params = {}, method = 'GET') {
             const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
@@ -295,13 +347,10 @@
             UI.errorAlert.classList.add('flex');
         }
 
-        // ==========================================
-        // CARREGAMENTO DE DADOS
-        // ==========================================
         async function loadAccounts() {
             UI.welcome.classList.add('hidden');
             UI.errorAlert.classList.add('hidden');
-            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Buscando Contas...</div>';
+            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Buscando Contas (Meta)...</div>';
             UI.dash.classList.remove('hidden');
 
             try {
@@ -407,17 +456,120 @@
         }
 
         // ==========================================
-        // FUNÇÕES DE AÇÃO DA API (CRIAR E ATUALIZAR)
+        // MOTOR DA KWAI API
+        // ==========================================
+        async function apiCallKwai(endpoint, bodyParams = {}, method = 'POST') {
+            // Nota de Arquitetura: Requisições diretas ao Kwai via Frontend costumam sofrer bloqueio de CORS.
+            // Para produção, esta URL deve apontar para o seu backend (ex: /api/kwai/proxy).
+            const url = `https://ad.kwai.com/openapi/v1${endpoint}`;
+            
+            const config = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Token': currentToken
+                }
+            };
+
+            if(method === 'POST') {
+                config.body = JSON.stringify(bodyParams);
+            }
+
+            try {
+                const res = await fetch(url, config);
+                const data = await res.json();
+                
+                if (data.code !== 0) {
+                    throw new Error(`Erro Kwai API [${data.code}]: ${data.message}`);
+                }
+                return data;
+            } catch (err) {
+                console.error("Kwai API Fetch Error:", err);
+                throw err;
+            }
+        }
+
+        async function loadKwaiAccounts(profile) {
+            UI.welcome.classList.add('hidden');
+            UI.errorAlert.classList.add('hidden');
+            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Carregando Perfil Kwai...</div>';
+            UI.dash.classList.remove('hidden');
+
+            try {
+                if(profile.advertiserId) {
+                    document.getElementById('accounts-table-container').innerHTML = `
+                        <div class="bg-card border border-border-color p-4 rounded-lg flex justify-between items-center">
+                            <div>
+                                <p class="text-white font-bold">Conta Principal Kwai</p>
+                                <p class="text-xs text-text-secondary font-mono">Adv ID: ${profile.advertiserId}</p>
+                            </div>
+                            <button class="bg-white/10 hover:bg-accent-primary px-3 py-2 rounded transition text-sm font-medium" onclick="loadKwaiCampaigns('${profile.advertiserId}', 'Conta Kwai Principal')">Abrir Campanhas</button>
+                        </div>
+                    `;
+                } else {
+                    throw new Error("O Advertiser ID não foi configurado neste perfil do Kwai. Re-adicione o perfil informando o ID.");
+                }
+            } catch (err) { handleVisualError(err.message); }
+        }
+
+        async function loadKwaiCampaigns(advertiserId, accountName) {
+            currentAccountId = advertiserId;
+            UI.errorAlert.classList.add('hidden');
+            UI.campSection.classList.remove('hidden');
+            document.getElementById('active-account-name').textContent = accountName;
+            document.getElementById('active-account-id').textContent = advertiserId;
+            
+            const tbody = document.getElementById('campaigns-tbody');
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-text-secondary animate-pulse">Consultando servidor do Kwai...</td></tr>';
+            
+            try {
+                const payload = {
+                    advertiser_id: parseInt(advertiserId),
+                    page: 1,
+                    page_size: 100
+                };
+                
+                const res = await apiCallKwai('/campaign/list', payload);
+                const campaigns = res.data.details || [];
+                
+                tbody.innerHTML = campaigns.map(camp => {
+                    const statusChecked = camp.status === 1 ? 'checked' : '';
+                    const budget = (camp.budget / 1000).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+                    
+                    return `
+                        <tr id="row-${camp.campaign_id}">
+                            <td class="text-center"><input type="checkbox" class="row-checkbox camp-checkbox" value="${camp.campaign_id}"></td>
+                            <td><label class="toggle-switch"><input type="checkbox" ${statusChecked} disabled><span class="slider"></span></label></td>
+                            <td><span class="font-medium text-white max-w-[200px] truncate" title="${camp.campaign_name}">${camp.campaign_name}</span></td>
+                            <td class="text-right">${budget}</td>
+                            <td class="text-right text-text-secondary text-xs italic" colspan="4">Métricas exigem proxy de backend (CORS)</td>
+                            <td class="text-center"><span class="action-icon text-text-secondary" title="Ação bloqueada via Front-end">🔒</span></td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="9" class="text-center text-text-secondary py-6">Nenhuma campanha encontrada no Kwai.</td></tr>';
+                
+                // Zerando sumário visualmente, já que métricas requerem o endpoint /report
+                document.getElementById('summary-spend').textContent = 'R$ 0,00';
+                document.getElementById('summary-purchases').textContent = '0';
+                document.getElementById('summary-cpa').textContent = 'R$ 0,00';
+                document.getElementById('summary-roas').textContent = '---';
+                document.getElementById('summary-roas').className = 'text-xl font-bold mt-1 text-text-secondary';
+
+            } catch (err) { handleVisualError(err.message); }
+        }
+
+        // ==========================================
+        // FUNÇÕES DE AÇÃO DA API (META)
         // ==========================================
         async function createCampaign() {
             if(!currentAccountId) return;
+            if(currentPlatform === 'kwai') { alert("Criação de campanhas Kwai ainda não suportada via API."); return; }
+            
             const campName = prompt("Nome da nova campanha:");
             if(!campName) return;
 
             try {
                 showToast(`Enviando para a Meta...`, 'info');
-                
-                // CÓDIGO CORRIGIDO PARA CRIAR CAMPANHA NA API NOVA
                 const params = {
                     name: campName, 
                     objective: 'OUTCOME_SALES', 
@@ -425,15 +577,10 @@
                     special_ad_categories: "['NONE']", 
                     buying_type: 'AUCTION'
                 };
-                
                 await apiCall(`/${currentAccountId}/campaigns`, params, 'POST');
                 showToast('Campanha Criada com Sucesso!', 'success');
-                
                 setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-            } catch (err) { 
-                showToast('Erro ao criar.', 'error');
-                handleVisualError(err.message); 
-            }
+            } catch (err) { showToast('Erro ao criar.', 'error'); handleVisualError(err.message); }
         }
 
         async function actionToggleStatus(id, checkbox) {
@@ -476,16 +623,6 @@
             }
         }
 
-        async function actionArchive(id) {
-            if(confirm("ARQUIVAR campanha?")) {
-                try {
-                    await apiCall(`/${id}`, { status: 'ARCHIVED' }, 'POST');
-                    document.getElementById(`row-${id}`).style.display = 'none';
-                    showToast('Arquivada.', 'success');
-                } catch (err) { handleVisualError(err.message); }
-            }
-        }
-
         async function actionDelete(id) {
             if(confirm("ATENÇÃO: Deseja DELETAR PERMANENTEMENTE esta campanha?")) {
                 try {
@@ -511,6 +648,11 @@
         }
 
         async function performBulkAction(action) {
+            if(currentPlatform === 'kwai') {
+                alert("Ações em massa não disponíveis para Kwai via Front-end.");
+                return;
+            }
+
             const checkboxes = document.querySelectorAll('.camp-checkbox:checked');
             const ids = Array.from(checkboxes).map(cb => cb.value);
             if(ids.length === 0) return;
