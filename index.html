@@ -3,696 +3,1313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HotTrack PRO - Ultimate Edition</title>
+    <title>HotTrack — Ads</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #050505; --bg-secondary: #0a0a0a; --bg-card: #141414;
-            --border-color: #262626; --accent-primary: #3b82f6; --accent-hover: #2563eb;
-            --text-primary: #f5f5f5; --text-secondary: #a3a3a3;
-            --success: #22c55e; --danger: #ef4444; --warning: #facc15;
+            --bg-0: #050505; --bg-1: #0a0a0a; --bg-2: #111114; --bg-3: #16161a;
+            --border-1: #1f1f24; --border-2: #2a2a32;
+            --text-0: #ffffff; --text-1: #d4d4d8; --text-2: #71717a; --text-3: #52525b;
+            --accent: #00d9ff; --accent-dim: rgba(0,217,255,0.12); --accent-glow: rgba(0,217,255,0.35);
+            --success: #00ff94; --success-dim: rgba(0,255,148,0.12);
+            --warning: #ffb800; --warning-dim: rgba(255,184,0,0.12);
+            --danger:  #ff3366; --danger-dim:  rgba(255,51,102,0.12);
+            --mono: 'JetBrains Mono', ui-monospace, monospace;
         }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); }
-        .form-input, .form-select { background-color: #0a0a0a; border: 1px solid var(--border-color); color: white; border-radius: 0.5rem; width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; }
-        .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent-primary); box-shadow: 0 0 0 1px var(--accent-primary); }
-        .btn-primary { background-color: var(--accent-primary); color: white; font-weight: 500; border-radius: 0.5rem; padding: 0.75rem 1rem; width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; transition: 0.2s; border: none; }
-        .btn-primary:hover { background-color: var(--accent-hover); }
-        .table-custom-wrapper { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 0.5rem; overflow: hidden; }
-        .table-custom { border-collapse: collapse; width: 100%; text-align: left; }
-        .table-custom th, .table-custom td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); white-space: nowrap; font-size: 0.875rem; }
-        .table-custom th { color: var(--text-secondary); font-weight: 600; text-transform: uppercase; font-size: 0.7rem; background: #0a0a0a; }
-        .table-custom tbody tr:hover { background-color: rgba(255, 255, 255, 0.02); }
+        * { box-sizing: border-box; }
+        html, body { font-family: 'Inter', sans-serif; background: var(--bg-0); color: var(--text-0); margin: 0; }
+        body {
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(0, 217, 255, 0.04), transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(0, 255, 148, 0.03), transparent 40%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+            background-size: 32px 32px; pointer-events: none; z-index: 0;
+        }
+        .mono { font-family: var(--mono); font-feature-settings: 'tnum'; }
+        .tabular { font-variant-numeric: tabular-nums; }
+
+        /* Container — simula a área de conteúdo de uma aba do HotTrack */
+        .tab-shell {
+            position: relative; z-index: 1;
+            max-width: 1600px; margin: 0 auto;
+            padding: 1.5rem 2rem 4rem;
+        }
+
+        /* Header da aba */
+        .tab-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+        .tab-title { display: flex; align-items: center; gap: 0.625rem; }
+        .tab-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+        .tab-title .icon { color: var(--accent); }
+        .tab-toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+        /* Tabs nav */
+        .tab-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border-1); margin-bottom: 1.5rem; }
+        .tab-link { padding: 0.7rem 1rem; font-size: 0.875rem; font-weight: 500; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.15s; background: transparent; border-top: 0; border-left: 0; border-right: 0; display: flex; align-items: center; gap: 0.5rem; }
+        .tab-link:hover { color: var(--text-0); }
+        .tab-link.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Form fields */
+        .field { background: var(--bg-1); border: 1px solid var(--border-1); color: var(--text-0); border-radius: 6px; padding: 0.5rem 0.7rem; font-size: 0.85rem; transition: 0.15s; }
+        .field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+        .field-sm { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.5rem 0.9rem; border-radius: 6px; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: 0.15s; border: 1px solid transparent; white-space: nowrap; line-height: 1; }
+        .btn-primary { background: var(--accent); color: var(--bg-0); font-weight: 600; }
+        .btn-primary:hover { box-shadow: 0 0 24px var(--accent-glow); transform: translateY(-1px); }
+        .btn-ghost { background: var(--bg-2); border-color: var(--border-2); color: var(--text-1); }
+        .btn-ghost:hover { background: var(--bg-3); border-color: var(--text-3); color: var(--text-0); }
+        .btn-meta { background: #1877F2; color: white; }
+        .btn-meta:hover { box-shadow: 0 0 24px rgba(24,119,242,0.4); }
+        .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
+        .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.7rem; }
+
+        /* KPI cards */
+        .kpi-hero { background: linear-gradient(135deg, var(--bg-2), var(--bg-1)); border: 1px solid var(--border-2); border-radius: 12px; padding: 1.5rem; position: relative; overflow: hidden; }
+        .kpi-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .kpi-card { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 8px; padding: 1rem; }
+        .kpi-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-2); font-weight: 600; }
+        .kpi-value { font-family: var(--mono); font-weight: 700; font-size: 1.5rem; margin-top: 0.5rem; color: var(--text-0); font-variant-numeric: tabular-nums; }
+        .kpi-hero .kpi-value { font-size: 2.5rem; line-height: 1; }
+        .kpi-trend { font-family: var(--mono); font-size: 0.75rem; margin-top: 0.25rem; }
+
+        /* Tables */
+        .tbl-wrap { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 10px; overflow: hidden; }
+        .tbl { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.875rem; }
+        .tbl th { padding: 0.65rem 0.85rem; color: var(--text-2); font-weight: 600; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.08em; background: var(--bg-1); border-bottom: 1px solid var(--border-1); white-space: nowrap; }
+        .tbl td { padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--border-1); white-space: nowrap; vertical-align: middle; }
+        .tbl tbody tr { transition: 0.1s; }
+        .tbl tbody tr:hover { background: var(--bg-3); }
+        .tbl tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+        .tbl tbody tr:last-child td { border-bottom: 0; }
+
+        /* Status dot */
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .dot-active { background: var(--success); animation: pulse 2s infinite; }
+        .dot-paused { background: var(--warning); }
+        .dot-off { background: var(--text-3); }
+        .dot-error { background: var(--danger); }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 8px currentColor, 0 0 0 0 currentColor; }
+            50% { box-shadow: 0 0 12px currentColor, 0 0 0 6px transparent; }
+        }
+
+        /* Skeleton */
+        .skl { background: linear-gradient(90deg, var(--bg-2) 0%, var(--bg-3) 50%, var(--bg-2) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; height: 12px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Modal */
         .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 1rem; }
-        .modal.flex { display: flex; }
-        .modal-backdrop { position: fixed; inset: 0; background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px); cursor: pointer;}
-        .modal-content { position: relative; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 1rem; width: 100%; max-width: 500px; overflow: hidden; z-index: 101;}
-        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-        .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #3f3f46; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(16px); }
-        .action-icon { cursor: pointer; opacity: 0.7; transition: 0.2s; font-size: 1rem; }
-        .action-icon:hover { opacity: 1; transform: scale(1.1); }
-        .row-checkbox { width: 16px; height: 16px; accent-color: var(--accent-primary); cursor: pointer; }
+        .modal.open { display: flex; animation: fadeIn 0.15s; }
+        .modal-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        .modal-card { position: relative; background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 12px; width: 100%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; max-height: 92vh; max-width: 480px; }
+        .modal-card.lg  { max-width: 720px; }
+        .modal-card.full { max-width: 95vw; }
+        .modal-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); z-index: 1; }
+        .modal-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-1); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 1rem; }
+        .modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; }
+        .modal-foot { padding: 0.875rem 1.25rem; background: var(--bg-1); border-top: 1px solid var(--border-1); display: flex; justify-content: flex-end; gap: 0.5rem; flex-shrink: 0; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* Toast */
+        .toast-wrap { position: fixed; bottom: 1rem; right: 1rem; z-index: 200; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast { background: var(--bg-2); border: 1px solid var(--border-2); border-left-width: 3px; padding: 0.7rem 1rem; border-radius: 6px; min-width: 260px; max-width: 400px; font-size: 0.85rem; pointer-events: auto; display: flex; gap: 0.65rem; align-items: flex-start; box-shadow: 0 10px 25px rgba(0,0,0,0.5); animation: slideUp 0.2s; transition: opacity 0.3s, transform 0.3s; }
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--accent); }
+        .toast .ts { font-family: var(--mono); font-size: 0.7rem; color: var(--text-3); flex-shrink: 0; }
+        .toast .msg { color: var(--text-1); flex: 1; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cmd+K */
+        .cmdk { position: fixed; inset: 0; z-index: 150; display: none; align-items: flex-start; justify-content: center; padding-top: 15vh; }
+        .cmdk.open { display: flex; animation: fadeIn 0.1s; }
+        .cmdk-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); }
+        .cmdk-card { position: relative; background: var(--bg-2); border: 1px solid var(--border-2); border-radius: 10px; width: 100%; max-width: 540px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.6); }
+        .cmdk-input { width: 100%; background: transparent; border: 0; padding: 1rem 1.25rem; color: var(--text-0); font-size: 0.95rem; outline: none; border-bottom: 1px solid var(--border-1); }
+        .cmdk-list { max-height: 320px; overflow-y: auto; padding: 0.5rem; }
+        .cmdk-item { padding: 0.625rem 0.75rem; border-radius: 6px; cursor: pointer; display: flex; gap: 0.75rem; align-items: center; font-size: 0.875rem; color: var(--text-1); }
+        .cmdk-item.active, .cmdk-item:hover { background: var(--bg-3); color: var(--text-0); }
+
+        /* Badges */
+        .badge { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.125rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--mono); white-space: nowrap; }
+        .badge-cyan  { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); }
+        .badge-green { background: var(--success-dim); color: var(--success); border: 1px solid var(--success); }
+        .badge-red   { background: var(--danger-dim); color: var(--danger); border: 1px solid var(--danger); }
+        .badge-amber { background: var(--warning-dim); color: var(--warning); border: 1px solid var(--warning); }
+        .badge-gray  { background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border-2); }
+
+        kbd { font-family: var(--mono); font-size: 0.7rem; padding: 2px 6px; background: var(--bg-1); border: 1px solid var(--border-1); border-radius: 4px; color: var(--text-2); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-1); }
+        ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+        .trend-up   { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        .trend-flat { color: var(--text-2); }
+
+        /* Empty/welcome state inline */
+        .empty-state { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 12px; padding: 3rem 1.5rem; text-align: center; }
+        .empty-icon { display: inline-block; padding: 1rem; border-radius: 12px; background: var(--accent-dim); border: 1px solid var(--accent); margin-bottom: 1rem; box-shadow: 0 0 40px var(--accent-dim); color: var(--accent); }
+
+        /* Error panel inline */
+        .err-panel { background: var(--bg-2); border: 1px solid var(--danger); border-left-width: 3px; border-radius: 8px; padding: 0.875rem 1rem; margin-bottom: 1rem; }
+        .err-panel pre { font-family: var(--mono); font-size: 0.78rem; color: var(--text-1); background: var(--bg-0); padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-1); margin-top: 0.5rem; white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; }
+
+        /* Sparkline */
+        .sparkline { width: 80px; height: 24px; display: inline-block; vertical-align: middle; }
+
+        /* Tree */
+        .tree-node { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 8px; overflow: hidden; transition: 0.15s; }
+        .tree-node:hover { border-color: var(--border-2); }
+        .tree-header { display: flex; align-items: center; gap: 0.65rem; padding: 0.7rem 0.95rem; cursor: pointer; user-select: none; transition: 0.1s; }
+        .tree-header:hover { background: var(--bg-3); }
+        .tree-chev { color: var(--text-2); transition: transform 0.15s; flex-shrink: 0; }
+        .tree-chev.open { transform: rotate(90deg); }
+        .tree-children { padding: 0.4rem; display: none; border-top: 1px solid var(--border-1); background: var(--bg-1); }
+        .tree-children.open { display: block; }
+        .tree-bm { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 6px; margin-bottom: 0.4rem; }
+        .tree-bm:last-child { margin-bottom: 0; }
+        .tree-bm > .tree-header { padding: 0.5rem 0.75rem; }
+        .tree-leaf { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; border-radius: 4px; transition: 0.1s; cursor: pointer; padding-left: 1.5rem; }
+        .tree-leaf:hover { background: var(--bg-3); }
+        .tree-spend { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--accent); }
+        .tree-meta-info { font-size: 0.7rem; color: var(--text-3); font-family: var(--mono); }
+
+        /* Creative cards (drill ads) */
+        .creative-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+        .creative-card { background: var(--bg-2); border: 1px solid var(--border-1); border-radius: 8px; overflow: hidden; transition: 0.15s; }
+        .creative-card:hover { border-color: var(--border-2); }
+        .creative-thumb { width: 100%; aspect-ratio: 1.91 / 1; background: var(--bg-1); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .creative-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .creative-thumb .placeholder { color: var(--text-3); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .creative-thumb .video-badge { position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.7); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.65rem; color: white; display: flex; align-items: center; gap: 0.25rem; font-family: var(--mono); }
+        .creative-body { padding: 0.85rem; }
+        .creative-headline { font-weight: 600; font-size: 0.875rem; margin-bottom: 0.25rem; line-height: 1.3; }
+        .creative-text { font-size: 0.75rem; color: var(--text-2); line-height: 1.4; max-height: 3em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .creative-cta { display: inline-block; padding: 0.15rem 0.4rem; border-radius: 3px; background: var(--accent-dim); color: var(--accent); font-size: 0.65rem; font-weight: 600; text-transform: uppercase; font-family: var(--mono); margin-top: 0.5rem; }
+        .creative-metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-1); font-size: 0.7rem; }
+        .creative-metric .lbl { color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.6rem; font-weight: 600; }
+        .creative-metric .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--text-0); }
+
+        /* Sub-tabs (no modal de ads) */
+        .sub-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-1); margin-bottom: 1rem; }
+        .sub-tab-btn { padding: 0.55rem 0.9rem; font-size: 0.8rem; color: var(--text-2); cursor: pointer; border-bottom: 2px solid transparent; transition: 0.15s; background: transparent; border-top: 0; border-left: 0; border-right: 0; font-weight: 500; }
+        .sub-tab-btn:hover { color: var(--text-0); }
+        .sub-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .sub-tab-content { display: none; }
+        .sub-tab-content.active { display: block; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body>
 
-    <aside class="w-72 bg-secondary border-r border-border-color flex flex-col z-10">
-        <div class="p-6 border-b border-border-color">
-            <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-accent-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                HotTrack <span class="text-xs font-normal bg-accent-primary/20 text-accent-primary px-2 py-1 rounded-full ml-1">MAX</span>
-            </h1>
+<div class="tab-shell">
+    <!-- Header da aba -->
+    <header class="tab-head">
+        <div class="tab-title">
+            <span class="icon" data-icon="zap-fill" data-icon-size="22"></span>
+            <h1>Anúncios</h1>
+            <span class="badge badge-cyan">VISUALIZAÇÃO</span>
         </div>
-        
-        <div class="p-4 flex-1 overflow-y-auto">
-            <div class="mb-6">
-                <div class="flex justify-between items-center mb-2">
-                    <label class="text-xs font-medium text-text-secondary uppercase">Perfis de Contingência</label>
-                    <button id="btn-add-profile" class="text-xs text-accent-primary hover:text-white">+ Adicionar</button>
+        <div class="tab-toolbar">
+            <select id="profile-selector" class="field field-sm">
+                <option value="">Selecione um perfil...</option>
+            </select>
+            <select id="datePreset" class="field field-sm">
+                <option value="today">Hoje</option>
+                <option value="yesterday">Ontem</option>
+                <option value="last_7d" selected>Últimos 7 dias</option>
+                <option value="last_30d">Últimos 30 dias</option>
+                <option value="maximum">Máximo</option>
+            </select>
+            <button id="btn-connect" class="btn btn-ghost btn-sm" title="Conectar perfil Meta">
+                <span data-icon="plug"></span>
+                Conectar
+            </button>
+            <button id="btn-reload" class="btn btn-ghost btn-sm" title="Recarregar (R)">
+                <span data-icon="refresh"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Tabs principais -->
+    <nav class="tab-nav">
+        <button class="tab-link" data-view="global"><span data-icon="globe"></span> Global</button>
+        <button class="tab-link" data-view="accounts"><span data-icon="grid"></span> Contas</button>
+    </nav>
+
+    <!-- Erro inline -->
+    <div id="error-alert" class="err-panel hidden">
+        <div class="flex items-center gap-2 mb-1">
+            <span class="dot dot-error"></span>
+            <strong class="text-[var(--danger)] text-xs font-bold uppercase tracking-wider mono">// ERRO DE COMUNICAÇÃO</strong>
+        </div>
+        <pre id="error-text"></pre>
+    </div>
+
+    <!-- ===== EMPTY STATE (sem perfil) ===== -->
+    <div id="empty-state" class="empty-state">
+        <span class="empty-icon" data-icon="zap-fill" data-icon-size="36"></span>
+        <h2 class="text-2xl font-bold tracking-tight mb-2">Conecte sua conta Meta</h2>
+        <p class="text-[var(--text-2)] mb-6 max-w-md mx-auto text-sm">Visualize gastos, vendas e métricas das suas campanhas Meta em uma interface unificada. Apenas leitura — o HotTrack não modifica seus anúncios.</p>
+        <button id="btn-big-connect" class="btn btn-primary px-6 py-2.5">
+            <span data-icon="facebook"></span>
+            Conectar com Meta
+        </button>
+        <p class="text-[10px] text-[var(--text-3)] mt-4 mono uppercase tracking-wider">
+            Permissões: ads_read · business_management
+        </p>
+    </div>
+
+    <!-- ===== VIEW: GLOBAL (multi-perfil tree) ===== -->
+    <div id="view-global" class="hidden space-y-5">
+        <!-- KPIs -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div class="kpi-hero md:col-span-1">
+                <p class="kpi-label">Gasto Total</p>
+                <p class="kpi-value tabular" id="g-spend">R$ 0</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">Vendas</p>
+                <p class="kpi-value tabular" id="g-purchases">0</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">ROAS</p>
+                <p class="kpi-value tabular" id="g-roas">0.00x</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">Contas</p>
+                <p class="kpi-value tabular" id="g-accounts">0</p>
+            </div>
+            <div class="kpi-card">
+                <p class="kpi-label">Perfis</p>
+                <p class="kpi-value tabular" id="g-profiles">0</p>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <button id="btn-tree-expand" class="btn btn-ghost btn-xs">
+                <span data-icon="chevron-down"></span> Expandir tudo
+            </button>
+            <button id="btn-tree-collapse" class="btn btn-ghost btn-xs">
+                <span data-icon="chevron-right"></span> Recolher tudo
+            </button>
+            <input id="tree-search" class="field field-sm flex-1 max-w-md ml-auto" placeholder="Buscar perfil, BM ou conta...">
+        </div>
+
+        <!-- Árvore -->
+        <div id="tree-container" class="space-y-2"></div>
+
+        <p id="global-subtitle" class="text-xs text-[var(--text-3)] mono"></p>
+    </div>
+
+    <!-- ===== VIEW: ACCOUNTS (lista de contas do perfil ativo) ===== -->
+    <div id="view-accounts" class="hidden space-y-4">
+        <div class="flex items-center justify-between gap-2">
+            <h2 class="text-lg font-bold">Todas as contas do perfil ativo</h2>
+            <span id="accounts-subtitle" class="text-xs text-[var(--text-3)] mono"></span>
+        </div>
+        <div id="accounts-table-container"></div>
+    </div>
+
+    <!-- ===== VIEW: CAMPAIGNS (drill numa conta) ===== -->
+    <div id="view-campaigns" class="hidden space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="kpi-hero">
+                <p class="kpi-label">ROAS Conta</p>
+                <p class="kpi-value tabular" id="summary-roas">0.00<span class="text-[var(--text-3)] text-xl">x</span></p>
+                <p class="kpi-trend" id="summary-roas-trend">—</p>
+            </div>
+            <div class="grid grid-cols-3 gap-3 md:col-span-2">
+                <div class="kpi-card"><p class="kpi-label">Gasto</p><p class="kpi-value tabular" id="summary-spend">R$ 0</p></div>
+                <div class="kpi-card"><p class="kpi-label">Vendas</p><p class="kpi-value tabular" id="summary-purchases">0</p></div>
+                <div class="kpi-card"><p class="kpi-label">CPA</p><p class="kpi-value tabular" id="summary-cpa">R$ 0</p></div>
+            </div>
+        </div>
+
+        <div class="flex items-end justify-between gap-3">
+            <div>
+                <button id="btn-back-to-accounts" class="btn btn-ghost btn-xs mb-2">
+                    <span data-icon="arrow-left"></span> Voltar
+                </button>
+                <h3 id="active-account-name" class="text-xl font-bold tracking-tight"></h3>
+                <p class="text-xs text-[var(--text-3)] mono mt-0.5" id="active-account-id"></p>
+            </div>
+        </div>
+
+        <div class="tbl-wrap overflow-x-auto">
+            <table class="tbl">
+                <thead><tr>
+                    <th>Status</th><th>Campanha</th><th>7d</th>
+                    <th class="text-right">Orçamento</th>
+                    <th class="text-right">Gasto</th>
+                    <th class="text-right">Vendas</th>
+                    <th class="text-right">CPA</th>
+                    <th class="text-right">ROAS</th>
+                    <th class="text-right">Freq</th>
+                    <th class="text-center">Ads</th>
+                </tr></thead>
+                <tbody id="campaigns-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: PROFILE (login manual) ===== -->
+<div id="add-profile-modal" class="modal">
+    <div class="modal-bg close-modal"></div>
+    <div class="modal-card">
+        <div class="modal-head">
+            <div class="flex items-center gap-2">
+                <span data-icon="plug" class="text-[var(--accent)]"></span>
+                <h3 class="font-bold text-sm uppercase tracking-wider">Conectar Conta Meta</h3>
+            </div>
+            <button class="btn btn-ghost btn-xs close-modal"><span data-icon="x"></span></button>
+        </div>
+        <div class="modal-body space-y-4">
+            <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,business_management,email&response_type=token" class="btn btn-meta w-full">
+                <span data-icon="facebook"></span>
+                Autenticar oficialmente na Meta (OAuth)
+            </a>
+            <p class="text-xs text-[var(--text-3)] text-center">Permissões pedidas: <span class="mono text-[var(--text-2)]">ads_read</span> · <span class="mono text-[var(--text-2)]">business_management</span></p>
+            <div class="flex items-center gap-3">
+                <div class="flex-grow border-t border-[var(--border-1)]"></div>
+                <span class="text-[10px] mono uppercase tracking-wider text-[var(--text-3)]">ou inserir token manualmente</span>
+                <div class="flex-grow border-t border-[var(--border-1)]"></div>
+            </div>
+            <div class="space-y-3">
+                <input type="text" id="profile-name" class="field w-full" placeholder="Nome do perfil (ex: Cliente A)">
+                <input type="password" id="profile-token" class="field w-full mono" placeholder="Token de acesso (EAAG...)">
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm close-modal">Cancelar</button>
+            <button id="save-profile-btn" class="btn btn-primary btn-sm"><span data-icon="check"></span> Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL: ADS DETAIL ===== -->
+<div id="ads-detail-modal" class="modal">
+    <div class="modal-bg" data-close="ads-detail"></div>
+    <div class="modal-card full">
+        <div class="modal-head">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span data-icon="eye" class="text-[var(--accent)]"></span>
+                <div class="flex-1 min-w-0">
+                    <h3 id="ads-detail-title" class="font-bold text-base truncate">Carregando...</h3>
+                    <p id="ads-detail-subtitle" class="text-xs text-[var(--text-3)] mono"></p>
                 </div>
-                <select id="profile-selector" class="form-select text-sm bg-card mb-2">
-                    <option value="">Nenhum perfil ativo...</option>
-                </select>
+                <div class="hidden md:flex items-center gap-3 text-xs">
+                    <span><span class="text-[var(--text-3)]">Gasto: </span><span class="mono tabular font-bold" id="ads-detail-spend">—</span></span>
+                    <span><span class="text-[var(--text-3)]">Vendas: </span><span class="mono tabular font-bold" id="ads-detail-purchases">—</span></span>
+                    <span><span class="text-[var(--text-3)]">ROAS: </span><span class="mono tabular font-bold" id="ads-detail-roas">—</span></span>
+                </div>
+            </div>
+            <button class="btn btn-ghost btn-xs" data-close="ads-detail"><span data-icon="x"></span></button>
+        </div>
+        <div class="modal-body">
+            <div class="sub-tabs">
+                <button class="sub-tab-btn active" data-tab="ads">Anúncios <span id="tab-ads-count" class="text-[var(--text-3)]"></span></button>
+                <button class="sub-tab-btn" data-tab="adsets">Ad Sets <span id="tab-adsets-count" class="text-[var(--text-3)]"></span></button>
             </div>
 
-            <div class="mb-6">
-                <label class="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">Período de Análise</label>
-                <select id="datePreset" class="form-select text-sm bg-card">
-                    <option value="today">Hoje</option>
-                    <option value="yesterday">Ontem</option>
-                    <option value="last_7d" selected>Últimos 7 dias</option>
-                    <option value="last_30d">Últimos 30 dias</option>
-                    <option value="maximum">Máximo</option>
-                </select>
-            </div>
-            
-            <div class="mt-8 border-t border-border-color pt-6">
-                <p class="text-xs text-text-secondary mb-2 uppercase tracking-wider">Automações Extras</p>
-                <button onclick="alert('Funcionalidade indisponível: Exige um servidor Back-end para processar imagens e contornar bloqueios de CORS.')" class="w-full text-left px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-white/5 rounded transition">🔄 Subir Criativos em Massa</button>
-            </div>
-        </div>
-    </aside>
-
-    <main class="flex-1 overflow-y-auto p-8 relative">
-        <div id="welcome-state" class="flex flex-col items-center justify-center h-full max-w-md mx-auto text-center">
-            <h2 class="text-2xl font-bold text-white mb-2">Central de Operações</h2>
-            <p class="text-text-secondary mb-6">Conecte um perfil da Meta ou Kwai para visualizar todas as Contas e gerenciar Campanhas.</p>
-            <button id="btn-big-connect" class="btn-primary w-full max-w-xs">Conectar Perfil</button>
-        </div>
-
-        <div id="error-alert" class="hidden bg-red-900/20 border border-red-500 text-red-400 p-6 rounded-lg mb-6 flex-col items-center text-center shadow-xl">
-            <svg class="w-12 h-12 mb-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <strong class="font-bold block text-xl mb-2 text-white">Erro de Comunicação (API)</strong>
-            <p class="text-sm bg-black/40 p-4 rounded text-left font-mono w-full overflow-x-auto break-words mt-2" id="error-text">Mensagem do erro aqui</p>
-        </div>
-
-        <div id="dashboard-content" class="hidden space-y-6">
-            <div id="accounts-section">
-                <h3 class="text-lg font-bold text-white mb-4">Gerenciadores de Anúncio</h3>
-                <div id="accounts-table-container"></div>
+            <div id="tab-content-ads" class="sub-tab-content active">
+                <div id="ads-grid" class="creative-grid"></div>
             </div>
 
-            <div id="campaigns-section" class="hidden border-t border-border-color pt-6">
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-card border border-border-color p-4 rounded-lg">
-                        <p class="text-xs text-text-secondary uppercase">Gasto Total (Período)</p>
-                        <p class="text-xl font-bold text-white mt-1" id="summary-spend">R$ 0,00</p>
-                    </div>
-                    <div class="bg-card border border-border-color p-4 rounded-lg">
-                        <p class="text-xs text-text-secondary uppercase">Vendas / Conversões</p>
-                        <p class="text-xl font-bold text-white mt-1" id="summary-purchases">0</p>
-                    </div>
-                    <div class="bg-card border border-border-color p-4 rounded-lg">
-                        <p class="text-xs text-text-secondary uppercase">CPA Médio</p>
-                        <p class="text-xl font-bold text-white mt-1" id="summary-cpa">R$ 0,00</p>
-                    </div>
-                    <div class="bg-card border border-border-color p-4 rounded-lg">
-                        <p class="text-xs text-text-secondary uppercase">ROAS Global</p>
-                        <p class="text-xl font-bold mt-1" id="summary-roas">0.00x</p>
-                    </div>
-                </div>
-
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
-                    <div>
-                        <h3 id="active-account-name" class="text-2xl font-bold text-white"></h3>
-                        <p class="text-xs text-text-secondary font-mono" id="active-account-id"></p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button id="btn-create-campaign" class="bg-accent-primary hover:bg-accent-hover text-white px-4 py-2 rounded text-sm font-medium transition flex items-center gap-2">
-                            + Nova Campanha
-                        </button>
-                    </div>
-                </div>
-
-                <div id="bulk-action-bar" class="hidden bg-blue-900/20 border border-blue-500/30 p-3 rounded-lg flex items-center justify-between mb-4">
-                    <span class="text-sm font-medium text-blue-300"><span id="bulk-count">0</span> itens selecionados</span>
-                    <div class="space-x-2">
-                        <button onclick="performBulkAction('ACTIVE')" class="bg-success hover:bg-green-500 text-white px-3 py-1.5 rounded text-xs font-bold transition">Ativar</button>
-                        <button onclick="performBulkAction('PAUSED')" class="bg-warning hover:bg-yellow-400 text-black px-3 py-1.5 rounded text-xs font-bold transition">Pausar</button>
-                        <button onclick="performBulkAction('DELETE')" class="bg-danger hover:bg-red-500 text-white px-3 py-1.5 rounded text-xs font-bold transition">Excluir</button>
-                    </div>
-                </div>
-                
-                <div class="table-custom-wrapper overflow-x-auto">
-                    <table class="table-custom">
-                        <thead>
-                            <tr>
-                                <th class="w-10 text-center"><input type="checkbox" id="select-all" class="row-checkbox"></th>
-                                <th>Status</th>
-                                <th>Nome da Campanha</th>
-                                <th class="text-right">Orçamento</th>
-                                <th class="text-right">Gasto</th>
-                                <th class="text-right">Compras</th>
-                                <th class="text-right">CPA</th>
-                                <th class="text-right">ROAS</th>
-                                <th class="text-center">Ferramentas</th>
-                            </tr>
-                        </thead>
-                        <tbody id="campaigns-tbody"></tbody>
+            <div id="tab-content-adsets" class="sub-tab-content">
+                <div class="tbl-wrap overflow-x-auto">
+                    <table class="tbl">
+                        <thead><tr>
+                            <th>Status</th><th>Ad Set</th>
+                            <th class="text-right">Budget</th>
+                            <th class="text-right">Gasto</th>
+                            <th class="text-right">Impr.</th>
+                            <th class="text-right">Cliques</th>
+                            <th class="text-right">CTR</th>
+                            <th class="text-right">CPM</th>
+                            <th class="text-right">CPC</th>
+                            <th class="text-right">Vendas</th>
+                            <th class="text-right">CPA</th>
+                            <th class="text-right">ROAS</th>
+                        </tr></thead>
+                        <tbody id="adsets-tbody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </main>
-
-    <div id="add-profile-modal" class="modal">
-        <div class="modal-backdrop close-modal"></div>
-        <div class="modal-content">
-            <div class="p-5 border-b border-border-color flex justify-between items-center bg-secondary">
-                <h3 class="font-bold text-white">Conexão de Plataforma</h3>
-                <button class="text-text-secondary hover:text-white close-modal">✕</button>
-            </div>
-            <div class="p-6 space-y-5">
-                <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=4251751071709692&redirect_uri=https://utmtrack.netlify.app/&scope=ads_read,ads_management&response_type=token" class="btn-primary" style="background-color: #1877F2; text-decoration: none;">
-                    Autenticar Oficialmente na Meta (OAuth)
-                </a>
-                <div class="flex items-center py-2"><div class="flex-grow border-t border-border-color"></div><span class="mx-3 text-xs text-text-secondary">OU ADICIONAR MANUALMENTE</span><div class="flex-grow border-t border-border-color"></div></div>
-                <div class="space-y-3">
-                    <select id="profile-platform" class="form-select text-sm font-bold text-accent-primary">
-                        <option value="meta">Meta Ads (Facebook/Instagram)</option>
-                        <option value="kwai">Kwai for Business</option>
-                    </select>
-                    
-                    <input type="text" id="profile-name" class="form-input text-sm" placeholder="Nome (Ex: Perfil Secundário)">
-                    <input type="password" id="profile-token" class="form-input text-sm font-mono" placeholder="Token de Acesso (EAAG... ou Kwai Token)">
-                    <input type="text" id="kwai-advertiser-id" class="form-input text-sm font-mono hidden" placeholder="Advertiser ID (Apenas Kwai)">
-                    
-                    <button id="save-profile-btn" class="bg-white/10 hover:bg-white/20 text-white w-full py-2 rounded-lg text-sm transition">Salvar Credenciais Localmente</button>
-                </div>
-            </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost btn-sm" data-close="ads-detail">Fechar</button>
         </div>
     </div>
+</div>
 
-    <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+<!-- ===== TOAST ===== -->
+<div id="toast-container" class="toast-wrap"></div>
 
-    <script>
-        // ESTADO GLOBAL
-        let profiles = JSON.parse(localStorage.getItem('hottrack_profiles')) || [];
-        let currentToken = null;
-        let currentAccountId = null;
-        let currentPlatform = null;
-        
-        const UI = {
-            welcome: document.getElementById('welcome-state'),
-            dash: document.getElementById('dashboard-content'),
-            selector: document.getElementById('profile-selector'),
-            modalProfile: document.getElementById('add-profile-modal'),
-            errorAlert: document.getElementById('error-alert'),
-            errorText: document.getElementById('error-text'),
-            campSection: document.getElementById('campaigns-section')
-        };
+<!-- ===== COMMAND PALETTE ===== -->
+<div id="cmdk" class="cmdk">
+    <div class="cmdk-bg" id="cmdk-bg"></div>
+    <div class="cmdk-card">
+        <input id="cmdk-input" class="cmdk-input" placeholder="Comando ou busca..." autocomplete="off">
+        <div id="cmdk-list" class="cmdk-list"></div>
+    </div>
+</div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash;
-            if (hash && hash.includes('access_token')) {
-                const params = new URLSearchParams(hash.substring(1));
-                const token = params.get('access_token');
-                window.history.replaceState({}, document.title, window.location.pathname);
-                const pName = prompt("Autenticado! Digite um nome para este perfil:");
-                if(pName) addProfile(pName, token, 'meta');
-            }
+<script>
+    // =========================================================================
+    // ICONS
+    // =========================================================================
+    const ICONS = {
+        'zap-fill':  '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0"><path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"/></svg>',
+        'plus':      '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+        'x':         '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+        'check':     '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+        'refresh':   '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>',
+        'plug':      '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5"/><path d="M9 8V2M15 8V2"/><path d="M5 8h14v3a7 7 0 01-14 0V8z"/></svg>',
+        'grid':      '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>',
+        'facebook':  '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H8v-3h2V9.5C10 7.57 11.57 6 13.5 6H16v3h-2c-.55 0-1 .45-1 1v2h3v3h-3v6.95c5.05-.5 9-4.76 9-9.95z"/></svg>',
+        'arrow-left':'<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
+        'arrow-right':'<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>',
+        'globe':     '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+        'briefcase': '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>',
+        'user':      '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+        'eye':       '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+        'video':     '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+        'chevron-right': '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+        'chevron-down':  '<svg width="ICONSIZE" height="ICONSIZE" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+    };
+    function renderIcons(scope) {
+        const root = scope || document;
+        root.querySelectorAll('[data-icon]').forEach(el => {
+            const name = el.getAttribute('data-icon');
+            const size = el.getAttribute('data-icon-size') || '16';
+            const svg = ICONS[name];
+            if (svg) el.innerHTML = svg.replaceAll('ICONSIZE', size);
+        });
+    }
 
-            // Migrar perfis antigos se existirem para incluir 'platform'
-            profiles = profiles.map(p => ({...p, platform: p.platform || 'meta'}));
+    // =========================================================================
+    // STORAGE
+    // =========================================================================
+    const LS = {
+        get(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; } },
+        set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+    };
 
-            renderProfileSelector();
+    // =========================================================================
+    // STATE
+    // =========================================================================
+    let profiles = LS.get('hottrack_profiles', []).map(p => ({ ...p, platform: p.platform || 'meta' }));
+    let treeExpanded = LS.get('utmtrack_tree_expanded', {});
 
-            document.getElementById('btn-big-connect').addEventListener('click', () => UI.modalProfile.classList.add('flex'));
-            document.getElementById('btn-add-profile').addEventListener('click', () => UI.modalProfile.classList.add('flex'));
-            document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', () => UI.modalProfile.classList.remove('flex')));
-            
-            // Alternar input do Kwai Advertiser ID
-            document.getElementById('profile-platform').addEventListener('change', (e) => {
-                const kwaiInput = document.getElementById('kwai-advertiser-id');
-                if(e.target.value === 'kwai') {
-                    kwaiInput.classList.remove('hidden');
-                } else {
-                    kwaiInput.classList.add('hidden');
-                }
-            });
+    let currentToken = null;
+    let currentProfileId = null;
+    let currentAccountId = null;
+    let currentView = 'global';
+    let allAccountsCache = [];
 
-            document.getElementById('save-profile-btn').addEventListener('click', () => {
-                const p = document.getElementById('profile-platform').value;
-                const n = document.getElementById('profile-name').value;
-                const t = document.getElementById('profile-token').value;
-                const advId = document.getElementById('kwai-advertiser-id').value;
-                
-                if(n && t) { 
-                    if(p === 'kwai' && !advId) {
-                        alert("Para o Kwai, o Advertiser ID é obrigatório.");
-                        return;
-                    }
-                    addProfile(n, t, p, advId); 
-                    UI.modalProfile.classList.remove('flex'); 
-                }
-            });
+    const UI = {
+        empty: document.getElementById('empty-state'),
+        viewGlobal: document.getElementById('view-global'),
+        viewAccounts: document.getElementById('view-accounts'),
+        viewCampaigns: document.getElementById('view-campaigns'),
+        selector: document.getElementById('profile-selector'),
+        modalProfile: document.getElementById('add-profile-modal'),
+        errorAlert: document.getElementById('error-alert'),
+        errorText: document.getElementById('error-text'),
+    };
 
-            // Roteamento de Perfis
-            UI.selector.addEventListener('change', (e) => {
-                UI.errorAlert.classList.add('hidden');
-                UI.campSection.classList.add('hidden');
-                
-                const selectedId = e.target.value;
-                const profile = profiles.find(p => p.id == selectedId);
+    // =========================================================================
+    // BOOT
+    // =========================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        renderIcons();
 
-                if(profile) { 
-                    currentToken = profile.token; 
-                    currentPlatform = profile.platform;
-                    
-                    if(currentPlatform === 'meta') {
-                        loadAccounts();
-                    } else if (currentPlatform === 'kwai') {
-                        loadKwaiAccounts(profile);
-                    }
-                } else { 
-                    currentToken = null; 
-                    currentPlatform = null;
-                    UI.dash.classList.add('hidden'); 
-                    UI.welcome.classList.remove('hidden'); 
-                }
-            });
+        // OAuth callback
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+            const params = new URLSearchParams(hash.substring(1));
+            const token = params.get('access_token');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            const name = window.prompt('Autenticado! Digite um nome para identificar este perfil:');
+            if (name) addProfile(name, token);
+        }
 
-            document.getElementById('datePreset').addEventListener('change', () => {
-                if(currentAccountId) {
-                    if (currentPlatform === 'meta') loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
-                    else if (currentPlatform === 'kwai') loadKwaiCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
-                }
-            });
+        renderProfileSelector();
 
-            document.getElementById('btn-create-campaign').addEventListener('click', createCampaign);
+        // Listeners
+        document.getElementById('btn-big-connect').addEventListener('click', openProfileModal);
+        document.getElementById('btn-connect').addEventListener('click', openProfileModal);
+        document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', closeProfileModal));
+        UI.modalProfile.querySelector('.modal-bg').addEventListener('click', closeProfileModal);
 
-            document.getElementById('select-all').addEventListener('change', (e) => {
-                const checkboxes = document.querySelectorAll('.camp-checkbox');
-                checkboxes.forEach(cb => cb.checked = e.target.checked);
-                updateBulkActionBar();
+        document.getElementById('save-profile-btn').addEventListener('click', () => {
+            const n = document.getElementById('profile-name').value.trim();
+            const t = document.getElementById('profile-token').value.trim();
+            if (!n || !t) return showToast('Nome e token são obrigatórios.', 'error');
+            addProfile(n, t);
+            closeProfileModal();
+        });
+
+        UI.selector.addEventListener('change', onProfileChange);
+        document.getElementById('datePreset').addEventListener('change', () => reloadCurrent());
+        document.getElementById('btn-reload').addEventListener('click', reloadCurrent);
+
+        // Tab nav
+        document.querySelectorAll('.tab-link').forEach(el => {
+            el.addEventListener('click', () => switchView(el.dataset.view));
+        });
+
+        document.getElementById('btn-back-to-accounts').addEventListener('click', () => switchView('accounts'));
+        document.getElementById('btn-tree-expand').addEventListener('click', () => { treeExpanded = {}; window._lastProfileNodes && Object.keys(window._lastProfileNodes._allKeys||{}).forEach(k => treeExpanded[k]=true); LS.set('utmtrack_tree_expanded', treeExpanded); window._lastProfileNodes && renderTree(window._lastProfileNodes); });
+        document.getElementById('btn-tree-collapse').addEventListener('click', () => { treeExpanded = {}; window._lastProfileNodes && Object.keys(window._lastProfileNodes._allKeys||{}).forEach(k => treeExpanded[k]=false); LS.set('utmtrack_tree_expanded', treeExpanded); window._lastProfileNodes && renderTree(window._lastProfileNodes); });
+        document.getElementById('tree-search').addEventListener('input', () => {
+            if (window._lastProfileNodes) renderTree(window._lastProfileNodes);
+        });
+
+        // Generic modal close
+        document.querySelectorAll('[data-close]').forEach(el => {
+            el.addEventListener('click', () => {
+                const t = el.getAttribute('data-close');
+                const map = { 'ads-detail': 'ads-detail-modal' };
+                const m = document.getElementById(map[t]);
+                if (m) m.classList.remove('open');
             });
         });
 
-        function addProfile(name, token, platform = 'meta', advertiserId = null) {
-            const id = Date.now().toString();
-            profiles.push({ id, name, token, platform, advertiserId });
-            localStorage.setItem('hottrack_profiles', JSON.stringify(profiles));
-            renderProfileSelector();
-            UI.selector.value = id;
-            UI.selector.dispatchEvent(new Event('change'));
-            showToast(`Perfil ${platform.toUpperCase()} conectado!`, 'success');
+        // Keyboard
+        document.addEventListener('keydown', onGlobalKey);
+
+        // CmdK
+        initCmdK();
+
+        // Initial view
+        if (profiles.length > 0) {
+            UI.empty.classList.add('hidden');
+            switchView('global');
+        }
+    });
+
+    function onGlobalKey(e) {
+        const inField = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openCmdK(); return; }
+        if (e.key === 'Escape') { closeAllModals(); closeCmdK(); return; }
+        if (inField) return;
+        if (e.key.toLowerCase() === 'r') { e.preventDefault(); reloadCurrent(); }
+        else if (e.key === '1') switchView('global');
+        else if (e.key === '2') switchView('accounts');
+    }
+
+    // =========================================================================
+    // VIEW ROUTING
+    // =========================================================================
+    function switchView(view) {
+        currentView = view;
+        document.querySelectorAll('.tab-link').forEach(el => {
+            el.classList.toggle('active', el.dataset.view === view);
+        });
+        UI.empty.classList.add('hidden');
+        UI.viewGlobal.classList.add('hidden');
+        UI.viewAccounts.classList.add('hidden');
+        UI.viewCampaigns.classList.add('hidden');
+
+        // Global usa todos os perfis (não exige currentToken)
+        if (view === 'global') {
+            if (profiles.length === 0) { UI.empty.classList.remove('hidden'); return; }
+            UI.viewGlobal.classList.remove('hidden');
+            loadGlobalView();
+            return;
+        }
+        if (view === 'campaigns') {
+            UI.viewCampaigns.classList.remove('hidden');
+            return;
+        }
+        // Accounts exige perfil selecionado
+        if (!currentToken) {
+            if (profiles.length === 0) { UI.empty.classList.remove('hidden'); return; }
+            UI.empty.classList.remove('hidden');
+            showToast('Selecione um perfil pra ver Contas.', 'error');
+            return;
+        }
+        UI.viewAccounts.classList.remove('hidden');
+        loadAccounts();
+    }
+
+    function reloadCurrent() {
+        if (currentView === 'global') loadGlobalView();
+        else if (currentView === 'accounts') loadAccounts();
+        else if (currentView === 'campaigns' && currentAccountId) loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent);
+    }
+
+    // =========================================================================
+    // PROFILE MGMT
+    // =========================================================================
+    function openProfileModal() { UI.modalProfile.classList.add('open'); }
+    function closeProfileModal() { UI.modalProfile.classList.remove('open'); }
+
+    function onProfileChange(e) {
+        UI.errorAlert.classList.add('hidden');
+        const profile = profiles.find(p => p.id == e.target.value);
+        if (profile) {
+            currentToken = profile.token;
+            currentProfileId = profile.id;
+            allAccountsCache = [];
+            if (currentView === 'campaigns') switchView('accounts');
+            else reloadCurrent();
+        } else {
+            currentToken = null;
+            currentProfileId = null;
+        }
+    }
+
+    function addProfile(name, token) {
+        const id = Date.now().toString();
+        profiles.push({ id, name, token, platform: 'meta' });
+        LS.set('hottrack_profiles', profiles);
+        renderProfileSelector();
+        UI.selector.value = id;
+        UI.selector.dispatchEvent(new Event('change'));
+        UI.empty.classList.add('hidden');
+        showToast(`Perfil conectado: ${name}`, 'success');
+        if (!currentView || currentView === 'global') switchView('global');
+    }
+
+    function renderProfileSelector() {
+        UI.selector.innerHTML = profiles.length === 0
+            ? '<option value="">Nenhum perfil conectado</option>'
+            : '<option value="">— Selecionar perfil —</option>' + profiles.map(p =>
+                `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('');
+    }
+
+    // =========================================================================
+    // META GRAPH API
+    // =========================================================================
+    async function apiCall(endpoint, params = {}, token = null) {
+        const t = token || currentToken;
+        if (!t) throw new Error('Sem token');
+        const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
+        url.searchParams.append('access_token', t);
+        for (let k in params) url.searchParams.append(k, typeof params[k] === 'object' ? JSON.stringify(params[k]) : params[k]);
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!res.ok || data.error) {
+            throw new Error(data.error ? `Graph API · code ${data.error.code}\n${data.error.message}` : `HTTP ${res.status}`);
+        }
+        return data;
+    }
+
+    function handleVisualError(msg) {
+        UI.errorText.textContent = msg;
+        UI.errorAlert.classList.remove('hidden');
+    }
+
+    function skeletonRows(cols, n = 5) {
+        return Array.from({ length: n }).map(() =>
+            `<tr>${Array.from({ length: cols }).map(() => `<td><div class="skl" style="width: ${50 + Math.random()*40}%"></div></td>`).join('')}</tr>`
+        ).join('');
+    }
+
+    function fmtCurrency(v, cur = 'BRL') { return v.toLocaleString('pt-BR', { style: 'currency', currency: cur }); }
+
+    function getAccountSpendData(acc) {
+        const ins = acc.insights?.data?.[0] || {};
+        const spend = parseFloat(ins.spend || 0);
+        const purch = parseFloat(ins.actions?.find(a => a.action_type === 'purchase')?.value || 0);
+        const rev = parseFloat(ins.action_values?.find(a => a.action_type === 'purchase')?.value || 0);
+        const roas = spend > 0 ? rev / spend : 0;
+        return { spend, purch, rev, roas, currency: acc.currency || 'BRL' };
+    }
+
+    // =========================================================================
+    // VIEW: GLOBAL (multi-perfil tree)
+    // =========================================================================
+    async function loadGlobalView() {
+        UI.errorAlert.classList.add('hidden');
+        ['g-spend', 'g-purchases', 'g-roas', 'g-accounts', 'g-profiles'].forEach(id => document.getElementById(id).textContent = '...');
+        document.getElementById('tree-container').innerHTML = '<div class="skl" style="height: 80px"></div>'.repeat(3);
+        document.getElementById('global-subtitle').textContent = `Carregando ${profiles.length} perfil(is)...`;
+
+        const metaProfiles = profiles.filter(p => p.platform === 'meta');
+        if (metaProfiles.length === 0) {
+            document.getElementById('tree-container').innerHTML = '<div class="kpi-card text-center text-[var(--text-3)]">Conecte ao menos 1 perfil Meta.</div>';
+            return;
         }
 
-        function renderProfileSelector() {
-            UI.selector.innerHTML = profiles.length === 0 
-                ? '<option value="">Nenhum perfil</option>' 
-                : '<option value="">-- Selecionar Perfil --</option>' + profiles.map(p => `<option value="${p.id}">[${p.platform.toUpperCase()}] ${p.name}</option>`).join('');
-        }
+        const preset = document.getElementById('datePreset').value;
+        const profileNodes = [];
 
-        // ==========================================
-        // MOTOR DA GRAPH API (META)
-        // ==========================================
-        async function apiCall(endpoint, params = {}, method = 'GET') {
-            const url = new URL(`https://graph.facebook.com/v19.0${endpoint}`);
-            let config = { method };
-            
-            if (method === 'GET') {
-                url.searchParams.append('access_token', currentToken);
-                for (let k in params) url.searchParams.append(k, params[k]);
-            } else {
-                const body = new URLSearchParams({ access_token: currentToken, ...params });
-                config.body = body;
-            }
-
+        await Promise.all(metaProfiles.map(async p => {
             try {
-                const res = await fetch(url, config);
-                const data = await res.json();
-                
-                if (!res.ok || data.error) {
-                    const errMsg = data.error ? `Erro Graph API:\nCódigo: ${data.error.code}\nMensagem: ${data.error.message}` : `Erro HTTP ${res.status}`;
-                    throw new Error(errMsg);
-                }
-                return data;
+                const accRes = await apiCall('/me/adaccounts', {
+                    fields: `account_id,name,account_status,currency,business{id,name},insights.date_preset(${preset}){spend,actions,action_values}`,
+                    limit: 200
+                }, p.token).catch(e => ({ data: [], _err: e.message }));
+                profileNodes.push({
+                    profile: p,
+                    accounts: accRes.data || [],
+                    error: accRes._err || null
+                });
             } catch (err) {
-                console.error("API Fetch Error:", err);
-                throw err;
+                profileNodes.push({ profile: p, accounts: [], error: err.message });
             }
-        }
+        }));
 
-        function handleVisualError(errorMessage) {
-            UI.welcome.classList.add('hidden');
-            UI.dash.classList.add('hidden');
-            UI.errorText.innerHTML = errorMessage.replace(/\n/g, '<br>');
-            UI.errorAlert.classList.remove('hidden');
-            UI.errorAlert.classList.add('flex');
-        }
+        let totalSpend = 0, totalPurch = 0, totalRev = 0, totalAccounts = 0;
+        profileNodes.forEach(pn => {
+            totalAccounts += pn.accounts.length;
+            pn.accounts.forEach(acc => {
+                const d = getAccountSpendData(acc);
+                totalSpend += d.spend; totalPurch += d.purch; totalRev += d.rev;
+            });
+        });
+        const totalRoas = totalSpend > 0 ? totalRev / totalSpend : 0;
 
-        async function loadAccounts() {
-            UI.welcome.classList.add('hidden');
-            UI.errorAlert.classList.add('hidden');
-            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Buscando Contas (Meta)...</div>';
-            UI.dash.classList.remove('hidden');
+        document.getElementById('g-spend').textContent = fmtCurrency(totalSpend);
+        document.getElementById('g-purchases').textContent = totalPurch;
+        const roasEl = document.getElementById('g-roas');
+        roasEl.innerHTML = `${totalRoas.toFixed(2)}<span class="text-[var(--text-3)] text-xl">x</span>`;
+        roasEl.className = `kpi-value tabular ${totalRoas >= 1 ? 'trend-up' : (totalRoas > 0 ? 'trend-down' : '')}`;
+        document.getElementById('g-accounts').textContent = totalAccounts;
+        document.getElementById('g-profiles').textContent = metaProfiles.length;
+        document.getElementById('global-subtitle').textContent = `${metaProfiles.length} perfil(is) · ${totalAccounts} conta(s) · período: ${preset}`;
 
-            try {
-                const res = await apiCall('/me/adaccounts', { fields: 'account_id,name,account_status' });
-                const accounts = res.data || [];
-                
-                document.getElementById('accounts-table-container').innerHTML = `
-                    <div class="table-custom-wrapper overflow-x-auto">
-                        <table class="table-custom">
-                            <thead><tr><th>ID</th><th>Nome da Conta</th><th>Status</th><th>Ação</th></tr></thead>
-                            <tbody>${accounts.map(acc => `
-                                <tr>
-                                    <td class="font-mono text-text-secondary">act_${acc.account_id}</td>
-                                    <td class="font-medium text-white">${acc.name}</td>
-                                    <td>${acc.account_status === 1 ? '<span class="text-success">Ativa</span>' : '<span class="text-danger">Bloqueada/Inativa</span>'}</td>
-                                    <td><button class="bg-white/10 hover:bg-accent-primary px-3 py-1 rounded transition text-sm" onclick="loadCampaigns('act_${acc.account_id}', '${acc.name.replace(/'/g, "\\'")}')">Abrir Campanhas</button></td>
-                                </tr>
-                            `).join('') || '<tr><td colspan="4" class="text-center">Nenhuma conta encontrada.</td></tr>'}</tbody>
-                        </table>
-                    </div>`;
-            } catch (err) { handleVisualError(err.message); }
-        }
+        window._lastProfileNodes = profileNodes;
+        renderTree(profileNodes);
+    }
 
-        async function loadCampaigns(accountId, accountName) {
-            currentAccountId = accountId;
-            UI.errorAlert.classList.add('hidden');
-            UI.campSection.classList.remove('hidden');
-            document.getElementById('active-account-name').textContent = accountName;
-            document.getElementById('active-account-id').textContent = accountId;
-            
-            const tbody = document.getElementById('campaigns-tbody');
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-text-secondary animate-pulse">Baixando métricas avançadas...</td></tr>';
-            
-            document.getElementById('bulk-action-bar').classList.add('hidden');
-            document.getElementById('select-all').checked = false;
+    function renderTree(profileNodes) {
+        const cont = document.getElementById('tree-container');
+        const search = (document.getElementById('tree-search').value || '').toLowerCase().trim();
+        const allKeys = {};
 
-            try {
-                const preset = document.getElementById('datePreset').value;
-                const params = {
-                    fields: 'name,status,daily_budget,insights.date_preset(' + preset + '){spend,actions,action_values}',
-                    limit: 100
-                };
-                
-                const res = await apiCall(`/${accountId}/campaigns`, params);
-                const campaigns = res.data || [];
-                const activeCamps = campaigns.filter(c => c.status !== 'DELETED');
+        cont.innerHTML = profileNodes.map(pn => {
+            let pSpend = 0, pPurch = 0, pRev = 0;
+            const bmGroups = {};
 
-                let totalSpend = 0; let totalPurchases = 0; let totalRev = 0;
+            pn.accounts.forEach(acc => {
+                const bmKey = acc.business ? acc.business.id : '_none';
+                const bmName = acc.business ? acc.business.name : '— Sem BM';
+                if (!bmGroups[bmKey]) bmGroups[bmKey] = { id: bmKey, name: bmName, accounts: [] };
+                bmGroups[bmKey].accounts.push(acc);
+                const d = getAccountSpendData(acc);
+                pSpend += d.spend; pPurch += d.purch; pRev += d.rev;
+            });
 
-                tbody.innerHTML = activeCamps.map(camp => {
-                    const ins = camp.insights?.data[0] || {};
-                    const spend = parseFloat(ins.spend || 0);
-                    const purchArr = ins.actions?.find(a => a.action_type === 'purchase');
-                    const purch = purchArr ? parseFloat(purchArr.value) : 0;
-                    const valArr = ins.action_values?.find(a => a.action_type === 'purchase');
-                    const rev = valArr ? parseFloat(valArr.value) : 0;
-                    
-                    totalSpend += spend; totalPurchases += purch; totalRev += rev;
+            const pRoas = pSpend > 0 ? pRev / pSpend : 0;
+            const profileKey = `prof_${pn.profile.id}`;
+            allKeys[profileKey] = true;
+            const profileOpen = treeExpanded[profileKey] !== false;
 
-                    const cpa = purch > 0 ? spend/purch : 0;
-                    const roas = spend > 0 ? rev/spend : 0;
-                    const budget = camp.daily_budget ? (parseFloat(camp.daily_budget)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'CBO/ABO Ext.';
+            const matchesSearch = !search || pn.profile.name.toLowerCase().includes(search) ||
+                Object.values(bmGroups).some(bm =>
+                    bm.name.toLowerCase().includes(search) ||
+                    bm.accounts.some(a => a.name.toLowerCase().includes(search) || a.account_id.includes(search))
+                );
+            if (!matchesSearch) return '';
 
+            const bmsHtml = Object.values(bmGroups).map(bm => {
+                let bSpend = 0, bRev = 0;
+                bm.accounts.forEach(a => { const d = getAccountSpendData(a); bSpend += d.spend; bRev += d.rev; });
+                const bRoas = bSpend > 0 ? bRev / bSpend : 0;
+                const bmKey = `bm_${pn.profile.id}_${bm.id}`;
+                allKeys[bmKey] = true;
+                const bmOpen = treeExpanded[bmKey] !== false;
+
+                const accountsHtml = bm.accounts.map(acc => {
+                    const id = `act_${acc.account_id}`;
+                    const d = getAccountSpendData(acc);
+                    const isActive = acc.account_status === 1;
                     return `
-                        <tr id="row-${camp.id}">
-                            <td class="text-center"><input type="checkbox" class="row-checkbox camp-checkbox" value="${camp.id}" onchange="updateBulkActionBar()"></td>
-                            <td>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" onchange="actionToggleStatus('${camp.id}', this)" ${camp.status==='ACTIVE'?'checked':''}>
-                                    <span class="slider"></span>
-                                </label>
-                            </td>
-                            <td>
-                                <div class="flex items-center gap-2">
-                                    <span class="font-medium text-white max-w-[200px] truncate" id="name-${camp.id}" title="${camp.name}">${camp.name}</span>
-                                    <span class="action-icon" onclick="actionRename('${camp.id}', '${camp.name.replace(/'/g, "\\'")}')" title="Renomear">✏️</span>
-                                </div>
-                            </td>
-                            <td class="text-right">
-                                <span class="action-icon mr-1" onclick="actionEditBudget('${camp.id}', '${camp.daily_budget||0}')" title="Editar Orçamento">✏️</span>
-                                ${budget}
-                            </td>
-                            <td class="text-right">${spend.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                            <td class="text-right">${purch}</td>
-                            <td class="text-right">${cpa.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                            <td class="text-right font-bold ${roas >= 1 ? 'text-success' : (roas>0?'text-danger':'text-text-secondary')}">${roas.toFixed(2)}x</td>
-                            <td class="text-center space-x-3">
-                                <span class="action-icon text-warning" onclick="actionDuplicate('${camp.id}')" title="Duplicar Rápido">📑</span>
-                                <span class="action-icon text-danger" onclick="actionDelete('${camp.id}')" title="Excluir Permanentemente">🗑️</span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('') || '<tr><td colspan="9" class="text-center text-text-secondary py-6">Nenhuma campanha rodando.</td></tr>';
+                        <div class="tree-leaf" onclick="loadCampaignsFromTree('${pn.profile.id}', '${id}', '${escapeAttr(acc.name)}')">
+                            <span class="dot ${isActive ? 'dot-active' : 'dot-paused'}" style="color: ${isActive ? 'var(--success)' : 'var(--warning)'};"></span>
+                            <span class="font-medium text-sm flex-1 truncate">${escapeHtml(acc.name)}</span>
+                            <span class="tree-meta-info hidden md:inline">${id}</span>
+                            <span class="tree-spend">${fmtCurrency(d.spend, d.currency)}</span>
+                            <span class="text-[var(--text-3)]" data-icon="chevron-right"></span>
+                        </div>`;
+                }).join('');
 
-                document.getElementById('summary-spend').textContent = totalSpend.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-                document.getElementById('summary-purchases').textContent = totalPurchases;
-                document.getElementById('summary-cpa').textContent = (totalPurchases > 0 ? totalSpend/totalPurchases : 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-                const gRoas = totalSpend > 0 ? totalRev/totalSpend : 0;
-                document.getElementById('summary-roas').textContent = gRoas.toFixed(2) + 'x';
-                document.getElementById('summary-roas').className = `text-xl font-bold mt-1 ${gRoas >= 1 ? 'text-success' : (gRoas > 0 ? 'text-danger' : 'text-white')}`;
-
-            } catch (err) { handleVisualError(err.message); }
-        }
-
-        // ==========================================
-        // MOTOR DA KWAI API
-        // ==========================================
-        async function apiCallKwai(endpoint, bodyParams = {}, method = 'POST') {
-            // Nota de Arquitetura: Requisições diretas ao Kwai via Frontend costumam sofrer bloqueio de CORS.
-            // Para produção, esta URL deve apontar para o seu backend (ex: /api/kwai/proxy).
-            const url = `https://ad.kwai.com/openapi/v1${endpoint}`;
-            
-            const config = {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Token': currentToken
-                }
-            };
-
-            if(method === 'POST') {
-                config.body = JSON.stringify(bodyParams);
-            }
-
-            try {
-                const res = await fetch(url, config);
-                const data = await res.json();
-                
-                if (data.code !== 0) {
-                    throw new Error(`Erro Kwai API [${data.code}]: ${data.message}`);
-                }
-                return data;
-            } catch (err) {
-                console.error("Kwai API Fetch Error:", err);
-                throw err;
-            }
-        }
-
-        async function loadKwaiAccounts(profile) {
-            UI.welcome.classList.add('hidden');
-            UI.errorAlert.classList.add('hidden');
-            document.getElementById('accounts-table-container').innerHTML = '<div class="text-center py-4 text-text-secondary animate-pulse">Carregando Perfil Kwai...</div>';
-            UI.dash.classList.remove('hidden');
-
-            try {
-                if(profile.advertiserId) {
-                    document.getElementById('accounts-table-container').innerHTML = `
-                        <div class="bg-card border border-border-color p-4 rounded-lg flex justify-between items-center">
-                            <div>
-                                <p class="text-white font-bold">Conta Principal Kwai</p>
-                                <p class="text-xs text-text-secondary font-mono">Adv ID: ${profile.advertiserId}</p>
-                            </div>
-                            <button class="bg-white/10 hover:bg-accent-primary px-3 py-2 rounded transition text-sm font-medium" onclick="loadKwaiCampaigns('${profile.advertiserId}', 'Conta Kwai Principal')">Abrir Campanhas</button>
+                return `
+                    <div class="tree-bm">
+                        <div class="tree-header" onclick="toggleTreeNode('${bmKey}')">
+                            <span class="tree-chev ${bmOpen ? 'open' : ''}" data-icon="chevron-right"></span>
+                            <span data-icon="briefcase" class="text-[var(--accent)]"></span>
+                            <span class="font-semibold text-sm flex-1 truncate">${escapeHtml(bm.name)}</span>
+                            <span class="text-xs text-[var(--text-3)]">${bm.accounts.length} conta</span>
+                            <span class="tree-spend">${fmtCurrency(bSpend)}</span>
+                            <span class="text-xs ${bRoas >= 1 ? 'trend-up' : (bRoas > 0 ? 'trend-down' : 'trend-flat')} mono">${bRoas.toFixed(2)}x</span>
                         </div>
-                    `;
-                } else {
-                    throw new Error("O Advertiser ID não foi configurado neste perfil do Kwai. Re-adicione o perfil informando o ID.");
-                }
-            } catch (err) { handleVisualError(err.message); }
+                        <div class="tree-children ${bmOpen ? 'open' : ''}">
+                            ${accountsHtml || '<div class="text-xs text-[var(--text-3)] italic px-3 py-2">Vazio</div>'}
+                        </div>
+                    </div>`;
+            }).join('');
+
+            const errBadge = pn.error ? `<span class="badge badge-red" style="font-size:0.6rem;">ERRO</span>` : '';
+
+            return `
+                <div class="tree-node">
+                    <div class="tree-header" onclick="toggleTreeNode('${profileKey}')">
+                        <span class="tree-chev ${profileOpen ? 'open' : ''}" data-icon="chevron-right"></span>
+                        <span data-icon="user" class="text-[var(--success)]"></span>
+                        <span class="font-bold flex-1 truncate">${escapeHtml(pn.profile.name)}</span>
+                        ${errBadge}
+                        <span class="text-xs text-[var(--text-3)]">${Object.keys(bmGroups).length} BM · ${pn.accounts.length} conta</span>
+                        <span class="tree-spend" style="font-size: 1rem;">${fmtCurrency(pSpend)}</span>
+                        <span class="text-xs ${pRoas >= 1 ? 'trend-up' : (pRoas > 0 ? 'trend-down' : 'trend-flat')} mono">${pRoas.toFixed(2)}x</span>
+                    </div>
+                    <div class="tree-children ${profileOpen ? 'open' : ''}">
+                        ${bmsHtml || '<div class="text-xs text-[var(--text-3)] italic px-3 py-2">Nenhuma conta acessível</div>'}
+                        ${pn.error ? `<div class="text-xs text-[var(--danger)] mono px-3 py-2 mt-2 bg-[var(--danger-dim)] rounded">⚠ ${escapeHtml(pn.error)}</div>` : ''}
+                    </div>
+                </div>`;
+        }).filter(Boolean).join('') || '<div class="kpi-card text-center text-[var(--text-3)]">Nenhum resultado</div>';
+
+        if (window._lastProfileNodes) window._lastProfileNodes._allKeys = allKeys;
+        renderIcons(cont);
+    }
+
+    function toggleTreeNode(key) {
+        treeExpanded[key] = !(treeExpanded[key] !== false);
+        LS.set('utmtrack_tree_expanded', treeExpanded);
+        if (window._lastProfileNodes) renderTree(window._lastProfileNodes);
+    }
+
+    function loadCampaignsFromTree(profileId, accountId, accountName) {
+        const p = profiles.find(pp => pp.id === profileId);
+        if (!p) return;
+        currentToken = p.token;
+        currentProfileId = profileId;
+        UI.selector.value = profileId;
+        loadCampaigns(accountId, accountName);
+    }
+
+    // =========================================================================
+    // VIEW: ACCOUNTS
+    // =========================================================================
+    async function loadAccounts() {
+        if (!currentToken) return;
+        UI.errorAlert.classList.add('hidden');
+        const cont = document.getElementById('accounts-table-container');
+        const sub = document.getElementById('accounts-subtitle');
+        sub.textContent = 'Carregando...';
+        cont.innerHTML = `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>ID</th><th>Conta</th><th>BM</th><th>Status</th><th class="text-right">Ação</th></tr></thead><tbody>${skeletonRows(5, 5)}</tbody></table></div>`;
+        try {
+            const res = await apiCall('/me/adaccounts', { fields: 'account_id,name,account_status,business{id,name},currency', limit: 200 });
+            allAccountsCache = res.data || [];
+            sub.textContent = `${allAccountsCache.length} conta(s)`;
+            cont.innerHTML = `
+                <div class="tbl-wrap overflow-x-auto">
+                    <table class="tbl">
+                        <thead><tr><th>ID</th><th>Conta</th><th>BM</th><th>Status</th><th class="text-right">Ação</th></tr></thead>
+                        <tbody>${allAccountsCache.map(acc => {
+                            const id = `act_${acc.account_id}`;
+                            return `
+                                <tr>
+                                    <td class="mono text-[var(--text-2)] text-xs">${id}</td>
+                                    <td class="font-medium">${escapeHtml(acc.name)}</td>
+                                    <td class="text-xs text-[var(--text-2)]">${acc.business ? escapeHtml(acc.business.name) : '<span class="text-[var(--text-3)]">—</span>'}</td>
+                                    <td>${acc.account_status === 1
+                                        ? '<span class="badge badge-green"><span class="dot dot-active" style="color:var(--success)"></span> Ativa</span>'
+                                        : '<span class="badge badge-red">Bloqueada</span>'}</td>
+                                    <td class="text-right">
+                                        <button class="btn btn-ghost btn-sm" onclick="loadCampaigns('${id}', '${escapeAttr(acc.name)}')">
+                                            Abrir <span data-icon="arrow-right"></span>
+                                        </button>
+                                    </td>
+                                </tr>`;
+                        }).join('') || `<tr><td colspan="5" class="text-center text-[var(--text-3)] py-6">Nenhuma conta encontrada.</td></tr>`}</tbody>
+                    </table>
+                </div>`;
+            renderIcons(cont);
+        } catch (err) { handleVisualError(err.message); }
+    }
+
+    // =========================================================================
+    // VIEW: CAMPAIGNS (drill numa conta)
+    // =========================================================================
+    async function loadCampaigns(accountId, accountName) {
+        currentAccountId = accountId;
+        switchView('campaigns');
+        UI.errorAlert.classList.add('hidden');
+        document.getElementById('active-account-name').textContent = accountName;
+        document.getElementById('active-account-id').textContent = accountId;
+        const tbody = document.getElementById('campaigns-tbody');
+        tbody.innerHTML = skeletonRows(10, 6);
+
+        try {
+            const preset = document.getElementById('datePreset').value;
+            const mainFields = `name,status,daily_budget,insights.date_preset(${preset}){spend,actions,action_values,frequency,impressions,clicks}`;
+            const sparkFields = `insights.date_preset(last_7d).time_increment(1){spend}`;
+            const [mainRes, sparkRes] = await Promise.all([
+                apiCall(`/${accountId}/campaigns`, { fields: mainFields, limit: 100 }),
+                apiCall(`/${accountId}/campaigns`, { fields: sparkFields, limit: 100 }).catch(() => ({ data: [] }))
+            ]);
+            const sparkMap = {};
+            (sparkRes.data || []).forEach(c => { sparkMap[c.id] = c.insights?.data || []; });
+            const campaigns = (mainRes.data || []).filter(c => c.status !== 'DELETED').map(c => ({ ...c, _spark: sparkMap[c.id] || [] }));
+
+            let totalSpend = 0, totalPurchases = 0, totalRev = 0;
+            tbody.innerHTML = campaigns.map(camp => {
+                const ins = camp.insights?.data?.[0] || {};
+                const spend = parseFloat(ins.spend || 0);
+                const purch = parseFloat(ins.actions?.find(a => a.action_type === 'purchase')?.value || 0);
+                const rev = parseFloat(ins.action_values?.find(a => a.action_type === 'purchase')?.value || 0);
+                const freq = parseFloat(ins.frequency || 0);
+                totalSpend += spend; totalPurchases += purch; totalRev += rev;
+
+                const cpa = purch > 0 ? spend / purch : 0;
+                const roas = spend > 0 ? rev / spend : 0;
+                const budget = camp.daily_budget
+                    ? fmtCurrency(parseFloat(camp.daily_budget) / 100)
+                    : '<span class="text-[var(--text-3)] text-xs italic">CBO/ABO</span>';
+                const isActive = camp.status === 'ACTIVE';
+                const dotCls = isActive ? 'dot-active' : (camp.status === 'PAUSED' ? 'dot-paused' : 'dot-off');
+                const roasCls = roas >= 1 ? 'trend-up' : (roas > 0 ? 'trend-down' : 'text-[var(--text-3)]');
+                const freqCls = freq > 3 ? 'trend-down' : (freq > 1.5 ? 'trend-flat' : 'text-[var(--text-3)]');
+                const spendSeries = (camp._spark || []).map(d => parseFloat(d.spend || 0));
+                const sparkline = renderSparkline(spendSeries, isActive ? 'var(--success)' : 'var(--text-3)');
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <span class="dot ${dotCls}" style="color: ${isActive ? 'var(--success)' : 'var(--warning)'}"></span>
+                                <span class="text-[10px] mono uppercase ${isActive ? 'text-[var(--success)]' : 'text-[var(--warning)]'}">${camp.status}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="font-medium max-w-[280px] truncate inline-block align-middle" title="${escapeAttr(camp.name)}">${escapeHtml(camp.name)}</span>
+                        </td>
+                        <td>${sparkline}</td>
+                        <td class="text-right mono tabular">${budget}</td>
+                        <td class="text-right mono tabular">${fmtCurrency(spend)}</td>
+                        <td class="text-right mono tabular">${purch}</td>
+                        <td class="text-right mono tabular">${fmtCurrency(cpa)}</td>
+                        <td class="text-right mono tabular font-bold ${roasCls}">${roas.toFixed(2)}x</td>
+                        <td class="text-right mono tabular ${freqCls}">${freq.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-ghost btn-xs" onclick="openAdsDetail('${camp.id}', '${escapeAttr(camp.name)}')" title="Ver anúncios e criativos">
+                                <span data-icon="eye"></span> Ver
+                            </button>
+                        </td>
+                    </tr>`;
+            }).join('') || `<tr><td colspan="10" class="text-center text-[var(--text-3)] py-8">Nenhuma campanha.</td></tr>`;
+            renderIcons(tbody);
+
+            document.getElementById('summary-spend').textContent = fmtCurrency(totalSpend);
+            document.getElementById('summary-purchases').textContent = totalPurchases;
+            document.getElementById('summary-cpa').textContent = fmtCurrency(totalPurchases > 0 ? totalSpend / totalPurchases : 0);
+            const gRoas = totalSpend > 0 ? totalRev / totalSpend : 0;
+            const roasEl = document.getElementById('summary-roas');
+            roasEl.innerHTML = `${gRoas.toFixed(2)}<span class="text-[var(--text-3)] text-xl">x</span>`;
+            roasEl.className = `kpi-value tabular ${gRoas >= 1 ? 'trend-up' : (gRoas > 0 ? 'trend-down' : '')}`;
+            const trend = gRoas >= 1 ? '▲ acima do break-even' : (gRoas > 0 ? '▼ abaixo do break-even' : '— sem receita');
+            const trendEl = document.getElementById('summary-roas-trend');
+            trendEl.textContent = trend;
+            trendEl.className = `kpi-trend ${gRoas >= 1 ? 'trend-up' : (gRoas > 0 ? 'trend-down' : 'trend-flat')}`;
+        } catch (err) { handleVisualError(err.message); }
+    }
+
+    function renderSparkline(values, color) {
+        if (!values || values.length < 2) return `<span class="text-[var(--text-3)] text-xs">—</span>`;
+        const max = Math.max(...values, 0.01);
+        const min = Math.min(...values, 0);
+        const range = max - min || 1;
+        const w = 80, h = 24, n = values.length;
+        const points = values.map((v, i) => {
+            const x = (i / (n - 1)) * w;
+            const y = h - ((v - min) / range) * h;
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(' ');
+        return `<svg class="sparkline" viewBox="0 0 ${w} ${h}"><polyline fill="none" stroke-width="1.5" points="${points}" stroke="${color}" /></svg>`;
+    }
+
+    // =========================================================================
+    // CAMPAIGN DRILL-DOWN: ADS + CRIATIVOS
+    // =========================================================================
+    async function openAdsDetail(campId, campName) {
+        const modal = document.getElementById('ads-detail-modal');
+        document.getElementById('ads-detail-title').textContent = campName;
+        document.getElementById('ads-detail-subtitle').textContent = `${campId} · carregando...`;
+        ['ads-detail-spend', 'ads-detail-purchases', 'ads-detail-roas'].forEach(id => document.getElementById(id).textContent = '—');
+        document.getElementById('ads-grid').innerHTML = '<div class="skl" style="height:280px"></div>'.repeat(4);
+        document.getElementById('adsets-tbody').innerHTML = skeletonRows(12, 4);
+        document.getElementById('tab-ads-count').textContent = '';
+        document.getElementById('tab-adsets-count').textContent = '';
+        modal.classList.add('open');
+
+        modal.querySelectorAll('.sub-tab-btn').forEach(b => {
+            b.onclick = () => {
+                modal.querySelectorAll('.sub-tab-btn').forEach(x => x.classList.toggle('active', x === b));
+                modal.querySelectorAll('.sub-tab-content').forEach(c => c.classList.toggle('active', c.id === `tab-content-${b.dataset.tab}`));
+            };
+        });
+
+        try {
+            const preset = document.getElementById('datePreset').value;
+            const insightsFields = '{spend,actions,action_values,impressions,clicks,inline_link_clicks,ctr,cpc,cpm,frequency,reach}';
+
+            const [adsetsRes, adsRes, campRes] = await Promise.all([
+                apiCall(`/${campId}/adsets`, {
+                    fields: `name,status,daily_budget,lifetime_budget,billing_event,optimization_goal,insights.date_preset(${preset})${insightsFields}`,
+                    limit: 100
+                }),
+                apiCall(`/${campId}/ads`, {
+                    fields: `name,status,effective_status,adset_id,creative{id,thumbnail_url,image_url,video_id,object_type,body,title,call_to_action_type},insights.date_preset(${preset})${insightsFields}`,
+                    limit: 200
+                }),
+                apiCall(`/${campId}`, { fields: `name,status,objective,insights.date_preset(${preset})${insightsFields}` })
+            ]);
+
+            const ci = campRes.insights?.data?.[0] || {};
+            const cSpend = parseFloat(ci.spend || 0);
+            const cPurch = parseFloat(ci.actions?.find(a => a.action_type === 'purchase')?.value || 0);
+            const cRev = parseFloat(ci.action_values?.find(a => a.action_type === 'purchase')?.value || 0);
+            const cRoas = cSpend > 0 ? cRev / cSpend : 0;
+            document.getElementById('ads-detail-spend').textContent = fmtCurrency(cSpend);
+            document.getElementById('ads-detail-purchases').textContent = cPurch;
+            const roasEl = document.getElementById('ads-detail-roas');
+            roasEl.textContent = `${cRoas.toFixed(2)}x`;
+            roasEl.className = `mono tabular font-bold ${cRoas >= 1 ? 'trend-up' : (cRoas > 0 ? 'trend-down' : 'trend-flat')}`;
+            document.getElementById('ads-detail-subtitle').textContent = `${campId} · objetivo ${campRes.objective || '—'} · ${campRes.status || '—'}`;
+
+            const adsets = adsetsRes.data || [];
+            const ads = adsRes.data || [];
+            document.getElementById('tab-ads-count').textContent = `(${ads.length})`;
+            document.getElementById('tab-adsets-count').textContent = `(${adsets.length})`;
+            renderAdsetsTable(adsets);
+            renderAdsGrid(ads, adsets);
+        } catch (err) {
+            document.getElementById('ads-grid').innerHTML = `<div class="kpi-card text-[var(--danger)] col-span-full"><strong>Erro:</strong> ${escapeHtml(err.message)}</div>`;
+            document.getElementById('adsets-tbody').innerHTML = `<tr><td colspan="12" class="text-[var(--danger)] text-center py-6">${escapeHtml(err.message)}</td></tr>`;
         }
+    }
 
-        async function loadKwaiCampaigns(advertiserId, accountName) {
-            currentAccountId = advertiserId;
-            UI.errorAlert.classList.add('hidden');
-            UI.campSection.classList.remove('hidden');
-            document.getElementById('active-account-name').textContent = accountName;
-            document.getElementById('active-account-id').textContent = advertiserId;
-            
-            const tbody = document.getElementById('campaigns-tbody');
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-text-secondary animate-pulse">Consultando servidor do Kwai...</td></tr>';
-            
-            try {
-                const payload = {
-                    advertiser_id: parseInt(advertiserId),
-                    page: 1,
-                    page_size: 100
-                };
-                
-                const res = await apiCallKwai('/campaign/list', payload);
-                const campaigns = res.data.details || [];
-                
-                tbody.innerHTML = campaigns.map(camp => {
-                    const statusChecked = camp.status === 1 ? 'checked' : '';
-                    const budget = (camp.budget / 1000).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-                    
-                    return `
-                        <tr id="row-${camp.campaign_id}">
-                            <td class="text-center"><input type="checkbox" class="row-checkbox camp-checkbox" value="${camp.campaign_id}"></td>
-                            <td><label class="toggle-switch"><input type="checkbox" ${statusChecked} disabled><span class="slider"></span></label></td>
-                            <td><span class="font-medium text-white max-w-[200px] truncate" title="${camp.campaign_name}">${camp.campaign_name}</span></td>
-                            <td class="text-right">${budget}</td>
-                            <td class="text-right text-text-secondary text-xs italic" colspan="4">Métricas exigem proxy de backend (CORS)</td>
-                            <td class="text-center"><span class="action-icon text-text-secondary" title="Ação bloqueada via Front-end">🔒</span></td>
-                        </tr>
-                    `;
-                }).join('') || '<tr><td colspan="9" class="text-center text-text-secondary py-6">Nenhuma campanha encontrada no Kwai.</td></tr>';
-                
-                // Zerando sumário visualmente, já que métricas requerem o endpoint /report
-                document.getElementById('summary-spend').textContent = 'R$ 0,00';
-                document.getElementById('summary-purchases').textContent = '0';
-                document.getElementById('summary-cpa').textContent = 'R$ 0,00';
-                document.getElementById('summary-roas').textContent = '---';
-                document.getElementById('summary-roas').className = 'text-xl font-bold mt-1 text-text-secondary';
-
-            } catch (err) { handleVisualError(err.message); }
+    function renderAdsetsTable(adsets) {
+        const tbody = document.getElementById('adsets-tbody');
+        if (adsets.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="12" class="text-center text-[var(--text-3)] py-6">Nenhum ad set</td></tr>';
+            return;
         }
+        tbody.innerHTML = adsets.map(as => {
+            const ins = as.insights?.data?.[0] || {};
+            const spend = parseFloat(ins.spend || 0);
+            const impr = parseInt(ins.impressions || 0);
+            const clicks = parseInt(ins.clicks || 0);
+            const ctr = parseFloat(ins.ctr || 0);
+            const cpm = parseFloat(ins.cpm || 0);
+            const cpc = parseFloat(ins.cpc || 0);
+            const purch = parseFloat(ins.actions?.find(a => a.action_type === 'purchase')?.value || 0);
+            const rev = parseFloat(ins.action_values?.find(a => a.action_type === 'purchase')?.value || 0);
+            const cpa = purch > 0 ? spend / purch : 0;
+            const roas = spend > 0 ? rev / spend : 0;
+            const budget = as.daily_budget ? `${(as.daily_budget/100).toFixed(0)} (D)` : (as.lifetime_budget ? `${(as.lifetime_budget/100).toFixed(0)} (L)` : '—');
+            const isActive = as.status === 'ACTIVE';
+            return `
+                <tr>
+                    <td><span class="dot ${isActive ? 'dot-active' : 'dot-paused'}" style="color: ${isActive ? 'var(--success)' : 'var(--warning)'}"></span></td>
+                    <td><span class="font-medium max-w-[260px] truncate inline-block align-middle" title="${escapeAttr(as.name)}">${escapeHtml(as.name)}</span></td>
+                    <td class="text-right mono tabular text-xs">${budget}</td>
+                    <td class="text-right mono tabular">${fmtCurrency(spend)}</td>
+                    <td class="text-right mono tabular text-xs">${impr.toLocaleString('pt-BR')}</td>
+                    <td class="text-right mono tabular text-xs">${clicks.toLocaleString('pt-BR')}</td>
+                    <td class="text-right mono tabular">${ctr.toFixed(2)}%</td>
+                    <td class="text-right mono tabular">${fmtCurrency(cpm)}</td>
+                    <td class="text-right mono tabular">${fmtCurrency(cpc)}</td>
+                    <td class="text-right mono tabular">${purch}</td>
+                    <td class="text-right mono tabular">${fmtCurrency(cpa)}</td>
+                    <td class="text-right mono tabular font-bold ${roas >= 1 ? 'trend-up' : (roas > 0 ? 'trend-down' : 'trend-flat')}">${roas.toFixed(2)}x</td>
+                </tr>`;
+        }).join('');
+    }
 
-        // ==========================================
-        // FUNÇÕES DE AÇÃO DA API (META)
-        // ==========================================
-        async function createCampaign() {
-            if(!currentAccountId) return;
-            if(currentPlatform === 'kwai') { alert("Criação de campanhas Kwai ainda não suportada via API."); return; }
-            
-            const campName = prompt("Nome da nova campanha:");
-            if(!campName) return;
-
-            try {
-                showToast(`Enviando para a Meta...`, 'info');
-                const params = {
-                    name: campName, 
-                    objective: 'OUTCOME_SALES', 
-                    status: 'PAUSED', 
-                    special_ad_categories: "['NONE']", 
-                    buying_type: 'AUCTION'
-                };
-                await apiCall(`/${currentAccountId}/campaigns`, params, 'POST');
-                showToast('Campanha Criada com Sucesso!', 'success');
-                setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-            } catch (err) { showToast('Erro ao criar.', 'error'); handleVisualError(err.message); }
+    function renderAdsGrid(ads, adsets) {
+        const grid = document.getElementById('ads-grid');
+        if (ads.length === 0) {
+            grid.innerHTML = '<div class="kpi-card text-center text-[var(--text-3)] col-span-full">Nenhum anúncio nesta campanha</div>';
+            return;
         }
+        const adsetMap = {};
+        adsets.forEach(as => { adsetMap[as.id] = as.name; });
 
-        async function actionToggleStatus(id, checkbox) {
-            const newStatus = checkbox.checked ? 'ACTIVE' : 'PAUSED';
-            try {
-                showToast(`Salvando...`, 'info');
-                await apiCall(`/${id}`, { status: newStatus }, 'POST');
-                showToast(`Status atualizado!`, 'success');
-            } catch (err) { checkbox.checked = !checkbox.checked; showToast('Erro', 'error'); handleVisualError(err.message); }
-        }
+        grid.innerHTML = ads.map(ad => {
+            const cr = ad.creative || {};
+            const headline = cr.title || ad.name;
+            const body = cr.body || '';
+            const cta = cr.call_to_action_type;
+            const isVideo = !!cr.video_id || cr.object_type === 'VIDEO';
 
-        async function actionRename(id, currentName) {
-            const newName = prompt("Novo Nome:", currentName);
-            if(newName && newName !== currentName) {
-                try {
-                    await apiCall(`/${id}`, { name: newName }, 'POST');
-                    document.getElementById(`name-${id}`).textContent = newName;
-                    showToast('Nome atualizado!', 'success');
-                } catch (err) { handleVisualError(err.message); }
-            }
-        }
-
-        async function actionEditBudget(id, currentBudget) {
-            const newVal = prompt("Novo orçamento diário:", currentBudget ? (currentBudget/100).toFixed(2) : "100.00");
-            if(newVal && !isNaN(newVal)) {
-                try {
-                    await apiCall(`/${id}`, { daily_budget: parseFloat(newVal) * 100 }, 'POST');
-                    showToast('Orçamento alterado! Recarregue a página.', 'success');
-                } catch (err) { handleVisualError(err.message); }
-            }
-        }
-
-        async function actionDuplicate(id) {
-            if(confirm("Criar uma cópia pausada na BM?")) {
-                try {
-                    await apiCall(`/${id}/copies`, { status: 'PAUSED' }, 'POST');
-                    showToast('Cópia gerada!', 'success');
-                    setTimeout(() => loadCampaigns(currentAccountId, document.getElementById('active-account-name').textContent), 1500);
-                } catch (err) { handleVisualError(err.message); }
-            }
-        }
-
-        async function actionDelete(id) {
-            if(confirm("ATENÇÃO: Deseja DELETAR PERMANENTEMENTE esta campanha?")) {
-                try {
-                    await apiCall(`/${id}`, {}, 'DELETE');
-                    document.getElementById(`row-${id}`).style.display = 'none';
-                    showToast('Campanha DELETADA com sucesso!', 'success');
-                } catch (err) { handleVisualError(err.message); }
-            }
-        }
-
-        // ==========================================
-        // AÇÕES EM MASSA (BULK)
-        // ==========================================
-        function updateBulkActionBar() {
-            const checked = document.querySelectorAll('.camp-checkbox:checked');
-            const bar = document.getElementById('bulk-action-bar');
-            if (checked.length > 0) {
-                document.getElementById('bulk-count').textContent = checked.length;
-                bar.classList.remove('hidden');
+            let thumbHtml;
+            if (cr.thumbnail_url) {
+                thumbHtml = `<img src="${escapeAttr(cr.thumbnail_url)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.placeholder').style.display='flex';">
+                             <div class="placeholder" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;">SEM PREVIEW</div>`;
+            } else if (cr.image_url) {
+                thumbHtml = `<img src="${escapeAttr(cr.image_url)}" alt="" loading="lazy">`;
             } else {
-                bar.classList.add('hidden');
-            }
-        }
-
-        async function performBulkAction(action) {
-            if(currentPlatform === 'kwai') {
-                alert("Ações em massa não disponíveis para Kwai via Front-end.");
-                return;
+                thumbHtml = `<div class="placeholder">SEM PREVIEW</div>`;
             }
 
-            const checkboxes = document.querySelectorAll('.camp-checkbox:checked');
-            const ids = Array.from(checkboxes).map(cb => cb.value);
-            if(ids.length === 0) return;
+            const ins = ad.insights?.data?.[0] || {};
+            const spend = parseFloat(ins.spend || 0);
+            const impr = parseInt(ins.impressions || 0);
+            const clicks = parseInt(ins.inline_link_clicks || ins.clicks || 0);
+            const ctr = parseFloat(ins.ctr || 0);
+            const cpm = parseFloat(ins.cpm || 0);
+            const cpc = parseFloat(ins.cpc || 0);
+            const freq = parseFloat(ins.frequency || 0);
+            const reach = parseInt(ins.reach || 0);
+            const purch = parseFloat(ins.actions?.find(a => a.action_type === 'purchase')?.value || 0);
+            const rev = parseFloat(ins.action_values?.find(a => a.action_type === 'purchase')?.value || 0);
+            const cpa = purch > 0 ? spend / purch : 0;
+            const roas = spend > 0 ? rev / spend : 0;
 
-            if(!confirm(`Deseja aplicar esta ação a ${ids.length} campanhas?`)) return;
+            const effStatus = ad.effective_status || ad.status;
+            const statusBadge = effStatus === 'ACTIVE' ? 'badge-green' :
+                (effStatus === 'PAUSED' ? 'badge-amber' :
+                (effStatus === 'DISAPPROVED' || effStatus === 'WITH_ISSUES' ? 'badge-red' : 'badge-gray'));
+            const adsetName = adsetMap[ad.adset_id] || ad.adset_id;
 
-            showToast(`Processando ${ids.length} itens...`, 'info');
+            return `
+                <div class="creative-card">
+                    <div class="creative-thumb">
+                        ${thumbHtml}
+                        ${isVideo ? '<span class="video-badge"><span data-icon="video" data-icon-size="10"></span> VÍDEO</span>' : ''}
+                        <span class="badge ${statusBadge}" style="position:absolute;top:0.5rem;right:0.5rem;">${effStatus}</span>
+                    </div>
+                    <div class="creative-body">
+                        <p class="creative-headline" title="${escapeAttr(headline)}">${escapeHtml(headline)}</p>
+                        ${body ? `<p class="creative-text">${escapeHtml(body)}</p>` : ''}
+                        ${cta ? `<span class="creative-cta">${escapeHtml(cta.replace(/_/g, ' '))}</span>` : ''}
+                        <p class="text-[10px] text-[var(--text-3)] mt-2 mono truncate" title="${escapeAttr(adsetName)}">📂 ${escapeHtml(adsetName)}</p>
+                        <div class="creative-metrics">
+                            <div class="creative-metric"><div class="lbl">Gasto</div><div class="val">${fmtCurrency(spend)}</div></div>
+                            <div class="creative-metric"><div class="lbl">Vendas</div><div class="val">${purch}</div></div>
+                            <div class="creative-metric"><div class="lbl">Impressões</div><div class="val">${impr >= 1000 ? (impr/1000).toFixed(1)+'K' : impr}</div></div>
+                            <div class="creative-metric"><div class="lbl">Cliques</div><div class="val">${clicks}</div></div>
+                            <div class="creative-metric"><div class="lbl">CTR</div><div class="val">${ctr.toFixed(2)}%</div></div>
+                            <div class="creative-metric"><div class="lbl">CPM</div><div class="val">${fmtCurrency(cpm)}</div></div>
+                            <div class="creative-metric"><div class="lbl">CPC</div><div class="val">${fmtCurrency(cpc)}</div></div>
+                            <div class="creative-metric"><div class="lbl">Frequência</div><div class="val ${freq > 3 ? 'trend-down' : (freq > 1.5 ? 'trend-flat' : '')}">${freq.toFixed(2)}</div></div>
+                            <div class="creative-metric"><div class="lbl">Alcance</div><div class="val">${reach >= 1000 ? (reach/1000).toFixed(1)+'K' : reach}</div></div>
+                            <div class="creative-metric"><div class="lbl">CPA</div><div class="val">${fmtCurrency(cpa)}</div></div>
+                            <div class="creative-metric" style="grid-column: span 2;"><div class="lbl">ROAS</div><div class="val text-base ${roas >= 1 ? 'trend-up' : (roas > 0 ? 'trend-down' : 'trend-flat')}">${roas.toFixed(2)}x</div></div>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+        renderIcons(grid);
+    }
 
-            let successCount = 0;
-            for(let id of ids) {
-                try {
-                    if (action === 'DELETE') {
-                        await apiCall(`/${id}`, {}, 'DELETE');
-                        document.getElementById(`row-${id}`).style.display = 'none';
-                    } else {
-                        await apiCall(`/${id}`, { status: action }, 'POST');
-                        const toggle = document.querySelector(`#row-${id} .toggle-switch input`);
-                        if(toggle) toggle.checked = (action === 'ACTIVE');
-                    }
-                    successCount++;
-                } catch(err) {
-                    console.error("Falha ao processar ID:", id, err);
-                }
-            }
-            
-            showToast(`${successCount} de ${ids.length} processados!`, 'success');
-            
-            document.querySelectorAll('.camp-checkbox').forEach(cb => cb.checked = false);
-            document.getElementById('select-all').checked = false;
-            updateBulkActionBar();
+    // =========================================================================
+    // TOAST + CMD+K + UTILS
+    // =========================================================================
+    function showToast(msg, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        const ts = new Date().toTimeString().slice(0, 8);
+        toast.innerHTML = `<span class="ts">${ts}</span><span class="msg">${escapeHtml(msg)}</span>`;
+        document.getElementById('toast-container').appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(8px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    function closeAllModals() { document.querySelectorAll('.modal.open').forEach(m => m.classList.remove('open')); }
+
+    let cmdkActiveIdx = 0;
+    let cmdkFiltered = [];
+
+    function getCommands() {
+        return [
+            { id: 'global',    label: 'Visão Global',           icon: 'globe',   run: () => switchView('global'),   kbd: '1' },
+            { id: 'accounts',  label: 'Visão Contas',           icon: 'grid',    run: () => switchView('accounts'), kbd: '2' },
+            { id: 'connect',   label: 'Conectar perfil Meta',   icon: 'plug',    run: openProfileModal },
+            { id: 'reload',    label: 'Recarregar',             icon: 'refresh', run: reloadCurrent, kbd: 'R' },
+            { id: 'today',     label: 'Período: Hoje',          icon: 'grid', run: () => setPreset('today') },
+            { id: 'yesterday', label: 'Período: Ontem',         icon: 'grid', run: () => setPreset('yesterday') },
+            { id: '7d',        label: 'Período: Últimos 7 dias',icon: 'grid', run: () => setPreset('last_7d') },
+            { id: '30d',       label: 'Período: Últimos 30 dias',icon:'grid', run: () => setPreset('last_30d') },
+        ];
+    }
+    function setPreset(val) {
+        document.getElementById('datePreset').value = val;
+        reloadCurrent();
+    }
+    function initCmdK() {
+        const input = document.getElementById('cmdk-input');
+        input.addEventListener('input', renderCmdK);
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') { e.preventDefault(); cmdkActiveIdx = Math.min(cmdkActiveIdx + 1, cmdkFiltered.length - 1); renderCmdK(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); cmdkActiveIdx = Math.max(cmdkActiveIdx - 1, 0); renderCmdK(); }
+            else if (e.key === 'Enter') { e.preventDefault(); runCmdK(cmdkActiveIdx); }
+            else if (e.key === 'Escape') closeCmdK();
+        });
+        document.getElementById('cmdk-bg').addEventListener('click', closeCmdK);
+    }
+    function openCmdK() {
+        const cmdk = document.getElementById('cmdk');
+        cmdk.classList.add('open');
+        const input = document.getElementById('cmdk-input');
+        input.value = ''; cmdkActiveIdx = 0;
+        setTimeout(() => input.focus(), 50);
+        renderCmdK();
+    }
+    function closeCmdK() { document.getElementById('cmdk').classList.remove('open'); }
+    function renderCmdK() {
+        const q = document.getElementById('cmdk-input').value.toLowerCase().trim();
+        const all = getCommands();
+        cmdkFiltered = q ? all.filter(c => c.label.toLowerCase().includes(q)) : all;
+        if (cmdkActiveIdx >= cmdkFiltered.length) cmdkActiveIdx = 0;
+        const list = document.getElementById('cmdk-list');
+        if (cmdkFiltered.length === 0) {
+            list.innerHTML = '<div class="text-center text-[var(--text-3)] text-sm py-6">Nenhum comando.</div>';
+            return;
         }
+        list.innerHTML = cmdkFiltered.map((c, i) => `
+            <div class="cmdk-item ${i === cmdkActiveIdx ? 'active' : ''}" onclick="runCmdK(${i})">
+                <span data-icon="${c.icon}" class="text-[var(--text-2)]"></span>
+                <span>${escapeHtml(c.label)}</span>
+                ${c.kbd ? `<kbd style="margin-left:auto">${c.kbd}</kbd>` : ''}
+            </div>`).join('');
+        renderIcons(list);
+    }
+    function runCmdK(idx) {
+        const cmd = cmdkFiltered[idx]; if (!cmd) return;
+        closeCmdK();
+        setTimeout(() => cmd.run(), 50);
+    }
 
-        function showToast(msg, type='info') {
-            const toast = document.createElement('div');
-            toast.className = `p-3 rounded shadow-lg text-white text-sm transform transition-all duration-300 translate-y-4 opacity-0 ${type==='success'?'bg-green-600':type==='error'?'bg-red-600':'bg-blue-600'}`;
-            toast.textContent = msg;
-            document.getElementById('toast-container').appendChild(toast);
-            requestAnimationFrame(() => toast.classList.remove('translate-y-4', 'opacity-0'));
-            setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(()=>toast.remove(),300); }, 3000);
-        }
-    </script>
+    function escapeHtml(str) {
+        if (str == null) return '';
+        return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function escapeAttr(str) { return escapeHtml(str).replace(/'/g, '&#39;'); }
+
+    // expose
+    window.loadCampaigns = loadCampaigns;
+    window.openAdsDetail = openAdsDetail;
+    window.toggleTreeNode = toggleTreeNode;
+    window.loadCampaignsFromTree = loadCampaignsFromTree;
+    window.runCmdK = runCmdK;
+</script>
+
 </body>
 </html>
